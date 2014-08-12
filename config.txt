@@ -1,0 +1,13 @@
+populationSize = 3
+maxDepthSize = 8
+maxDepthSizeInitial = 5
+tournamentSize = 2
+numberOfGeneration = 2
+elitismPercentage = 0.01
+reproductionProbability = 0.01
+mutationProbability = 0.01
+terminalNodeBias = 0.1
+primProbability = 0.6
+numberOfRandomConstant = 10
+maxThresholdDC = 10
+//minThresholdDC = 50
