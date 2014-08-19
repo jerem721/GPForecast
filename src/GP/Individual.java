@@ -41,12 +41,14 @@ public class Individual implements Comparable<Individual>{
                 account += currentPrice;
             }
         }
-        return account + (numberOfStock * currentPrice);
+        fitness = account + (numberOfStock * currentPrice);
+        return fitness;
     }
 
     public String print()
     {
-        return treeRoot.print("");
+        return "Fitness: " + fitness +
+               "\n" + treeRoot.print("");
     }
 
     public IExpression getTreeRoot()

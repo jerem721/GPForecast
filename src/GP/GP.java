@@ -34,6 +34,8 @@ public class GP{
     private int             numberOfTrainingValue;
     private int             numberOfTestingValue;
 
+    private Fitness         bestFitness;
+
 
     public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market)
     {
@@ -73,6 +75,7 @@ public class GP{
         numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
         Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
 
+        bestFitness = null;
     }
 
     public void start()
@@ -88,11 +91,15 @@ public class GP{
             population.print();
 
             population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market);
+            if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
+                bestFitness = population.getBestFitness();
+
             population.sortPopulation();
             if (i < numberOfGeneration + 1)
                 population = breed();
             i++;
         }
+        validateIndividual();
     }
 
     private Population breed()
@@ -119,5 +126,10 @@ public class GP{
                 nextPopulation.addIndividual(population.crossover(tournamentSize, terminalNodeBias, maxDepthSize));
         }
         return nextPopulation;
+    }
+
+    private void validateIndividual()
+    {
+
     }
 }

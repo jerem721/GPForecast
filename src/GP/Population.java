@@ -14,7 +14,8 @@ public class Population {
 
     private List<Individual>    individuals;
     private Random              random;
-    private Double              bestFitness;
+    private Fitness             bestFitness;
+
 
     public enum EPopulationGeneration{
         GROW_METHOD, FULL_METHOD, RAMPER_HALF_AND_HALF;
@@ -45,6 +46,7 @@ public class Population {
         int     i;
 
         i = 1;
+        Log.getInstance().log("Best Fitness: " + bestFitness.getValue());
         for (Individual individual : individuals)
         {
             Log.getInstance().log("\n===== Individual " + i + " =====");
@@ -114,13 +116,29 @@ public class Population {
     {
         Iterator<Individual>        iterator;
         double                      fitness;
+        Individual                  individual;
 
+        bestFitness = new Fitness(0.0, null);
         for (iterator = individuals.iterator(); iterator.hasNext();)
         {
-            fitness = iterator.next().evaluate(account, stock, numberOfTrainingValue, market);
-            if (bestFitness == null || bestFitness <= fitness)
-                bestFitness = fitness;
+            individual = iterator.next();
+            fitness = individual.evaluate(account, stock, numberOfTrainingValue, market);
+            if (bestFitness.getValue() <= fitness)
+            {
+                bestFitness.setValue(fitness);
+                bestFitness.setTree(individual.getTreeRoot());
+            }
         }
+    }
+
+    public Fitness getBestFitness()
+    {
+        return bestFitness;
+    }
+
+    public void setBestFitness(Fitness bestFitness)
+    {
+        this.bestFitness = bestFitness;
     }
 
     public void sortPopulation()
