@@ -17,13 +17,31 @@ public class Individual implements Comparable<Individual>{
         fitness = 0.0;
     }
 
-    public double evaluate(double account, int stock, int numberOfTrainingValue, Market market)
+    public double evaluate(double account, int totalStock, int numberOfTrainingValue, Market market)
     {
+        double  currentPrice;
+        int     numberOfStock;
+        boolean buy;
+
+        numberOfStock = 0;
+        currentPrice = 0.0;
         for (int index = 0; index <= numberOfTrainingValue; index++)
         {
-            treeRoot.evaluate(index);
+            currentPrice = market.getPrice(index).getPrice();
+            buy = treeRoot.evaluate(index);
+            if (buy == true && account >= currentPrice && totalStock > 0)
+            {
+                totalStock--;
+                numberOfStock++;
+                account -= currentPrice;
+            }else if (buy == false && numberOfStock > 0)
+            {
+                totalStock++;
+                numberOfStock--;
+                account += currentPrice;
+            }
         }
-        return 0.0;
+        return account + (numberOfStock * currentPrice);
     }
 
     public String print()

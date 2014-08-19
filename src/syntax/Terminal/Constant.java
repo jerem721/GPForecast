@@ -69,7 +69,21 @@ public class Constant implements IExpression {
 
     @Override
     public Boolean evaluate(int index) {
-       return true;
+        if (index <= directionalChangeEvent.size())
+        {
+            switch (directionalChangeEvent.get(index))
+            {
+                case DOWNTURN:
+                    return false;
+                case DOWNTURN_OVERSHOOT:
+                    return false;
+                case UPTURN:
+                    return true;
+                case UPTURN_OVERSHOOT:
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override
