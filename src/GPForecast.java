@@ -1,8 +1,10 @@
 
 import GP.GP;
 import directionalChanges.DirectionalChanges;
+import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.IEvent;
 import directionalChanges.algorithm.runs.IRun;
+import file.ReaderFile;
 import logger.Log;
 import properties.PropertiesGp;
 import syntax.Function.EFunction;
@@ -10,11 +12,9 @@ import syntax.PrimitiveSet;
 import syntax.Terminal.Constant;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class GPForecast implements DirectionalChanges.OnDirectionalChangesListener {
+public class GPForecast {
 
     private DirectionalChanges dc;
 
@@ -22,7 +22,10 @@ public class GPForecast implements DirectionalChanges.OnDirectionalChangesListen
     private double              maxThresholdDC;
     private double              minThresholdDC;
 
-    private List<IEvent>        eventList;
+    private Market              market;
+    private PropertiesGp        propertiesGp;
+    private PrimitiveSet        primitiveSet;
+    private GP                  gp;
 
     public static void main(String[] args) {
         GPForecast GPForecast;
@@ -35,20 +38,14 @@ public class GPForecast implements DirectionalChanges.OnDirectionalChangesListen
 
     public void launch(String[] args)
     {
-        PropertiesGp    propertiesGp;
-        PrimitiveSet    primitiveSet;
-        GP              gp;
-
-        if (args.length < 2){
+        if (args.length < 2)
+        {
             System.out.println("./GeneticProgramming <input file> <output dir> [<config file>]");
             System.exit(0);
-        }
-
-        if (args.length > 2)
+        }else  if (args.length > 2)
             propertiesGp = new PropertiesGp(args[2]);
         else
             propertiesGp = new PropertiesGp();
-        primitiveSet = new PrimitiveSet();
 
         Log.getInstance().log("===== Configuration DC =====");
         Log.getInstance().log("Data file : " + args[0]);
@@ -60,8 +57,13 @@ public class GPForecast implements DirectionalChanges.OnDirectionalChangesListen
         minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
         Log.getInstance().log("Minimum threshold : " + minThresholdDC);
 
-        gp = new GP(propertiesGp, primitiveSet);
-        dc = new DirectionalChanges(args[0], args[1]);
+        primitiveSet = new PrimitiveSet();
+
+        market = new Market();
+        initMarket(args[0]);
+
+        gp = new GP(propertiesGp, primitiveSet, market);
+        dc = new DirectionalChanges(args[1], market);
 
         initFunctionSet(primitiveSet);
         initTerminalSet(primitiveSet);
@@ -90,32 +92,32 @@ public class GPForecast implements DirectionalChanges.OnDirectionalChangesListen
         DecimalFormat       df              = new DecimalFormat();
         double              threshold;
         Random              rd              = new Random();
+        DCListener          dcListener;
 
         Log.getInstance().log("\n===== Terminal Set =====");
         df.setMaximumFractionDigits(2);
-        dc.init();
-        dc.setListener(this);
         for (int i = numberOfRandomConstant; i > 0; i--)
         {
-            eventList = new ArrayList<IEvent>();
+            dcListener = new DCListener();
+            dc.setListener(dcListener);
             threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
             dc.start(threshold);
-            primitiveSet.addTerminal(new Constant(new Double(threshold), eventList));
+            primitiveSet.addTerminal(new Constant(new Double(threshold), dcListener.getEvents()));
             Log.getInstance().log("- Constant : " + threshold);
         }
-        dc.finish();
     }
 
-    @Override
-    public void onDownwardRun(IRun downwardRun) {
-        if (downwardRun != null && downwardRun.getEvent() != null && eventList != null)
-            eventList.add(downwardRun.getEvent());
+    private void initMarket(String inputFile)
+    {
+        ReaderFile                  input;
+        TreeMap<Integer, String>    stockPrices;
+
+        input = new ReaderFile(inputFile);
+        stockPrices = input.read();
+        for (Map.Entry<Integer, String> price : stockPrices.entrySet())
+            market.addPrice(Double.parseDouble(price.getValue()));
+        input.close();
     }
 
-    @Override
-    public void onUpwardRun(IRun upwardRun) {
-        if (upwardRun != null && upwardRun.getEvent() != null && eventList != null)
-            eventList.add(upwardRun.getEvent());
-    }
 }
 

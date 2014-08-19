@@ -1,5 +1,6 @@
 package syntax.Terminal;
 
+import directionalChanges.algorithm.events.EEvent;
 import directionalChanges.algorithm.events.IEvent;
 import syntax.IExpression;
 
@@ -13,15 +14,15 @@ public class Constant implements IExpression {
 
     private Double          value;              // threshold
     private IExpression     children[] = {};
-    private List<IEvent>    directionalChangeEvent;
+    private List<EEvent>    directionalChangeEvent;
 
     public Constant(Double value)
     {
         this.value = value;
-        directionalChangeEvent = new ArrayList<IEvent>();
+        directionalChangeEvent = new ArrayList<EEvent>();
     }
 
-    public Constant(Double value, List<IEvent> eventList)
+    public Constant(Double value, List<EEvent> eventList)
     {
         this.value = value;
         directionalChangeEvent = eventList;
@@ -45,12 +46,12 @@ public class Constant implements IExpression {
     @Override
     public void setChildren(IExpression[] children) {}
 
-    public void addDCEvent(IEvent event)
+    public void addDCEvent(EEvent event)
     {
         directionalChangeEvent.add(event);
     }
 
-    public List<IEvent> getDCEvent()
+    public List<EEvent> getDCEvent()
     {
         return directionalChangeEvent;
     }

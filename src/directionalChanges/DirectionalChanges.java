@@ -5,8 +5,8 @@ package directionalChanges;
 import directionalChanges.algorithm.Algorithm2;
 import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.runs.IRun;
-import directionalChanges.file.ReaderFile;
-import directionalChanges.file.WriterFile;
+import file.ReaderFile;
+import file.WriterFile;
 
 import java.util.*;
 
@@ -26,11 +26,10 @@ public class DirectionalChanges implements Algorithm2.OnDirectionalChangeListene
         public void onUpwardRun(IRun upwardRun);
     }
 
-    public DirectionalChanges(String inputFile, String outputDirectory)
+    public DirectionalChanges(String outputDirectory, Market market)
     {
-        this.intputFile = new ReaderFile(inputFile);
         this.outFileDirectory = outputDirectory;
-        market = new Market();
+        this.market = market;
     }
 
     public void setListener(OnDirectionalChangesListener listener)
@@ -50,20 +49,6 @@ public class DirectionalChanges implements Algorithm2.OnDirectionalChangeListene
         algo.setOnDirectionalChangeListener(this);
         algo.launch(threshold);
         outputFile.close();
-    }
-
-    public void finish(){
-        if (intputFile != null)
-            intputFile.close();
-    }
-
-    public void init()
-    {
-        TreeMap<Integer, String> stockPrices;
-
-        stockPrices = intputFile.read();
-        for (Map.Entry<Integer, String> price : stockPrices.entrySet())
-            market.addPrice(Double.parseDouble(price.getValue()));
     }
 
     @Override

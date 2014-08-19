@@ -1,5 +1,6 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
 import logger.Log;
 import properties.PropertiesGp;
 import syntax.PrimitiveSet;
@@ -14,6 +15,7 @@ public class GP{
     private Random          rd;
     private PrimitiveSet    primitiveSet;
     private Population      population;
+    private Market          market;
 
     private int             populationSize;
     private int             maxDepthSizeInitial;
@@ -26,14 +28,17 @@ public class GP{
     private double          terminalNodeBias;
     private double          primProbability;
 
-    private int             numberOfRandomConstant;
-    private double          maxThresholdDC;
-    private double          minThresholdDC;
+    private int             numberOfStock;
+    private int             numberOfMoney;
+    private int             numberOfTrainingValue;
+    private int             numberOfTestingValue;
 
-    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet)
+
+    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market)
     {
         rd = new Random();
         this.primitiveSet = primitiveSet;
+        this.market = market;
         population = new Population();
 
         Log.getInstance().log("\n===== Configuration GP =====");
@@ -58,10 +63,14 @@ public class GP{
         Log.getInstance().log("Terminal node bias : " + terminalNodeBias);
         primProbability = propertiesGp.getDoubleProperty("primProbability", 0.6);
         Log.getInstance().log("Prim probability : " + primProbability);
-
-        numberOfRandomConstant = propertiesGp.getIntProperty("numberOfRandomConstant", 5);
-        maxThresholdDC = propertiesGp.getDoubleProperty("maxThresholdDC", 100);
-        minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
+        numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
+        Log.getInstance().log("Number of stocks : " + numberOfStock);
+        numberOfMoney = propertiesGp.getIntProperty("numberOfMoney", 500);
+        Log.getInstance().log("Number of money : " + numberOfMoney);
+        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
+        Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
+        numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
+        Log.getInstance().log("Number of training value : " + numberOfTrainingValue);
     }
 
     public void start()

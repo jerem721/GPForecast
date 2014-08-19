@@ -20,7 +20,7 @@ public class PropertiesGp {
             fileReader = new FileReader("config.txt");
             properties.load(fileReader);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("/!\\ Config file not found.");
         } catch (IOException e) {
             e.printStackTrace();
         }
