@@ -11,7 +11,7 @@ public interface IExpression {
     public IExpression[]   getChildren();
     public void            setChildren(IExpression[] children);
     public int             getNumberChildren();
-    public Boolean         evaluate();
+    public Boolean         evaluate(int index);
     public IExpression     clone();
     public String          print(String tab);
 

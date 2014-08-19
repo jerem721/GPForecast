@@ -1,5 +1,6 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
 import syntax.IExpression;
 
 /**
@@ -16,9 +17,13 @@ public class Individual implements Comparable<Individual>{
         fitness = 0.0;
     }
 
-    public Boolean evaluate()
+    public double evaluate(double account, int stock, int numberOfTrainingValue, Market market)
     {
-        return treeRoot.evaluate();
+        for (int index = 0; index <= numberOfTrainingValue; index++)
+        {
+            treeRoot.evaluate(index);
+        }
+        return 0.0;
     }
 
     public String print()

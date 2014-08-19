@@ -42,9 +42,9 @@ public class Not implements IExpression {
     }
 
     @Override
-    public Boolean evaluate()
+    public Boolean evaluate(int index)
     {
-        return !children[0].evaluate();
+        return !children[0].evaluate(index);
     }
 
     @Override

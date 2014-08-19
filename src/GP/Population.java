@@ -1,5 +1,6 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
 import logger.Log;
 import syntax.IExpression;
 import syntax.PrimitiveSet;
@@ -13,8 +14,7 @@ public class Population {
 
     private List<Individual>    individuals;
     private Random              random;
-
-
+    private Double              bestFitness;
 
     public enum EPopulationGeneration{
         GROW_METHOD, FULL_METHOD, RAMPER_HALF_AND_HALF;
@@ -110,12 +110,17 @@ public class Population {
         return primitiveSet.getRandomTerminal();
     }
 
-    public void fitnessFunction()
+    public void fitnessFunction(double account, int stock, int numberOfTrainingValue, Market market)
     {
-        Iterator<Individual>       iterator;
+        Iterator<Individual>        iterator;
+        double                      fitness;
 
         for (iterator = individuals.iterator(); iterator.hasNext();)
-            iterator.next().evaluate();
+        {
+            fitness = iterator.next().evaluate(account, stock, numberOfTrainingValue, market);
+            if (bestFitness == null || bestFitness <= fitness)
+                bestFitness = fitness;
+        }
     }
 
     public void sortPopulation()

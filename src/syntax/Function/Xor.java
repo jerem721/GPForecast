@@ -42,9 +42,9 @@ public class Xor implements IExpression {
     }
 
     @Override
-    public Boolean evaluate()
+    public Boolean evaluate(int index)
     {
-        return (children[0].evaluate() ^ children[1].evaluate());
+        return (children[0].evaluate(index) ^ children[1].evaluate(index));
     }
 
     @Override

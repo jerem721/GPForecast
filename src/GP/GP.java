@@ -5,6 +5,7 @@ import logger.Log;
 import properties.PropertiesGp;
 import syntax.PrimitiveSet;
 
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -29,7 +30,7 @@ public class GP{
     private double          primProbability;
 
     private int             numberOfStock;
-    private int             numberOfMoney;
+    private double          numberOfMoney;
     private int             numberOfTrainingValue;
     private int             numberOfTestingValue;
 
@@ -65,12 +66,13 @@ public class GP{
         Log.getInstance().log("Prim probability : " + primProbability);
         numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
         Log.getInstance().log("Number of stocks : " + numberOfStock);
-        numberOfMoney = propertiesGp.getIntProperty("numberOfMoney", 500);
+        numberOfMoney = propertiesGp.getDoubleProperty("numberOfMoney", 500);
         Log.getInstance().log("Number of money : " + numberOfMoney);
-        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
-        Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
         numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
         Log.getInstance().log("Number of training value : " + numberOfTrainingValue);
+        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
+        Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
+
     }
 
     public void start()
@@ -85,7 +87,7 @@ public class GP{
             Log.getInstance().log("\n\n\n========== Run " + i + " ==========");
             population.print();
 
-            population.fitnessFunction();
+            population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market);
             population.sortPopulation();
             if (i < numberOfGeneration + 1)
                 population = breed();

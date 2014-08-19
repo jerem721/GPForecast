@@ -68,7 +68,7 @@ public class Constant implements IExpression {
     }
 
     @Override
-    public Boolean evaluate() {
+    public Boolean evaluate(int index) {
        return true;
     }
 
