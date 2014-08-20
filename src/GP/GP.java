@@ -97,7 +97,7 @@ public class GP{
             population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market, dcData);
             if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
                 bestFitness = population.getBestFitness();
-            //population.print();
+            population.printBestFitness();
 
             population.sortPopulation();
             if (i < numberOfGeneration + 1)

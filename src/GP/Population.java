@@ -58,6 +58,11 @@ public class Population {
         }
     }
 
+    public void printBestFitness()
+    {
+        Log.getInstance().log("Best fitness: " + bestFitness.getValue());
+    }
+
     public void createPopulation(EPopulationGeneration type, int numberOfPopulation, int depth, PrimitiveSet primitiveSet, double primpProb)
     {
         individuals.clear();

@@ -89,9 +89,9 @@ public class Individual implements Comparable<Individual>{
     @Override
     public int compareTo(Individual o) {
         if (fitness > o.getFitness())
-            return 1;
-        if (fitness < o.getFitness())
             return -1;
+        if (fitness < o.getFitness())
+            return 1;
         return  0;
     }
 }
