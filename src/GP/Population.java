@@ -7,6 +7,7 @@ import syntax.IExpression;
 import syntax.PrimitiveSet;
 
 import javax.rmi.CORBA.Util;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -60,7 +61,11 @@ public class Population {
 
     public void printBestFitness()
     {
-        Log.getInstance().log("Best fitness: " + bestFitness.getValue());
+        DecimalFormat df;
+
+        df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        Log.getInstance().log("Best fitness: " + df.format(bestFitness.getValue()));
     }
 
     public void createPopulation(EPopulationGeneration type, int numberOfPopulation, int depth, PrimitiveSet primitiveSet, double primpProb)
