@@ -1,6 +1,10 @@
 package syntax.Function;
 
+import directionalChanges.algorithm.events.EEvent;
 import syntax.IExpression;
+
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Created by jerem on 11/08/14.
@@ -42,9 +46,9 @@ public class Or implements IExpression {
     }
 
     @Override
-    public Boolean evaluate(int index)
+    public Boolean evaluate(int index, Hashtable<Double, List<EEvent>> dcData)
     {
-        return (children[0].evaluate(index) || children[1].evaluate(index));
+        return (children[0].evaluate(index, dcData) || children[1].evaluate(index, dcData));
     }
 
     @Override

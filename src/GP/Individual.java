@@ -1,7 +1,11 @@
 package GP;
 
 import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import syntax.IExpression;
+
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Created by jerem on 11/08/14.
@@ -17,7 +21,8 @@ public class Individual implements Comparable<Individual>{
         fitness = 0.0;
     }
 
-    public double evaluate(double account, int totalStock, int numberOfTrainingValue, Market market)
+    public double evaluate(double account, int totalStock, int numberOfTrainingValue, Market market,
+                           Hashtable<Double, List<EEvent>> dcData)
     {
         double  currentPrice;
         int     numberOfStock;
@@ -28,7 +33,7 @@ public class Individual implements Comparable<Individual>{
         for (int index = 0; index <= numberOfTrainingValue; index++)
         {
             currentPrice = market.getPrice(index).getPrice();
-            buy = treeRoot.evaluate(index);
+            buy = treeRoot.evaluate(index, dcData);
             if (buy == true && account >= currentPrice && totalStock > 0)
             {
                 totalStock--;
@@ -49,6 +54,7 @@ public class Individual implements Comparable<Individual>{
     {
         return "Fitness: " + fitness +
                "\n" + treeRoot.print("");
+        //return "Fitness: " + fitness;
     }
 
     public IExpression getTreeRoot()

@@ -1,10 +1,12 @@
 package GP;
 
 import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import syntax.IExpression;
 import syntax.PrimitiveSet;
 
+import javax.rmi.CORBA.Util;
 import java.util.*;
 
 /**
@@ -46,7 +48,8 @@ public class Population {
         int     i;
 
         i = 1;
-        Log.getInstance().log("Best Fitness: " + bestFitness.getValue());
+        if (bestFitness != null)
+            Log.getInstance().log("Best Fitness: " + bestFitness.getValue());
         for (Individual individual : individuals)
         {
             Log.getInstance().log("\n===== Individual " + i + " =====");
@@ -112,7 +115,8 @@ public class Population {
         return primitiveSet.getRandomTerminal();
     }
 
-    public void fitnessFunction(double account, int stock, int numberOfTrainingValue, Market market)
+    public void fitnessFunction(double account, int stock, int numberOfTrainingValue, Market market, Hashtable<Double,
+            List<EEvent>> dcData)
     {
         Iterator<Individual>        iterator;
         double                      fitness;
@@ -122,7 +126,7 @@ public class Population {
         for (iterator = individuals.iterator(); iterator.hasNext();)
         {
             individual = iterator.next();
-            fitness = individual.evaluate(account, stock, numberOfTrainingValue, market);
+            fitness = individual.evaluate(account, stock, numberOfTrainingValue, market, dcData);
             if (bestFitness.getValue() <= fitness)
             {
                 bestFitness.setValue(fitness);

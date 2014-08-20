@@ -2,6 +2,7 @@
 import GP.GP;
 import directionalChanges.DirectionalChanges;
 import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import directionalChanges.algorithm.events.IEvent;
 import directionalChanges.algorithm.runs.IRun;
 import file.ReaderFile;
@@ -18,14 +19,15 @@ public class GPForecast {
 
     private DirectionalChanges dc;
 
-    private int                 numberOfRandomConstant;
-    private double              maxThresholdDC;
-    private double              minThresholdDC;
+    private int                                 numberOfRandomConstant;
+    private double                              maxThresholdDC;
+    private double                              minThresholdDC;
 
-    private Market              market;
-    private PropertiesGp        propertiesGp;
-    private PrimitiveSet        primitiveSet;
-    private GP                  gp;
+    private Market                              market;
+    private PropertiesGp                        propertiesGp;
+    private PrimitiveSet                        primitiveSet;
+    private GP                                  gp;
+    private Hashtable<Double, List<EEvent>>     dcData;
 
     public static void main(String[] args) {
         GPForecast GPForecast;
@@ -57,12 +59,13 @@ public class GPForecast {
         minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
         Log.getInstance().log("Minimum threshold : " + minThresholdDC);
 
+        dcData = new Hashtable<Double, List<EEvent>>();
         primitiveSet = new PrimitiveSet();
 
         market = new Market();
         initMarket(args[0]);
 
-        gp = new GP(propertiesGp, primitiveSet, market);
+        gp = new GP(propertiesGp, primitiveSet, market, dcData);
         dc = new DirectionalChanges(args[1], market);
 
         initFunctionSet(primitiveSet);
@@ -102,7 +105,8 @@ public class GPForecast {
             dc.setListener(dcListener);
             threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
             dc.start(threshold);
-            primitiveSet.addTerminal(new Constant(new Double(threshold), dcListener.getEvents()));
+            primitiveSet.addTerminal(new Constant(new Double(threshold)));
+            dcData.put(threshold, dcListener.getEvents());
             Log.getInstance().log("- Constant : " + threshold);
         }
     }

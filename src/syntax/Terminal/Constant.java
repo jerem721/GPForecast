@@ -5,6 +5,7 @@ import directionalChanges.algorithm.events.IEvent;
 import syntax.IExpression;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -14,18 +15,10 @@ public class Constant implements IExpression {
 
     private Double          value;              // threshold
     private IExpression     children[] = {};
-    private List<EEvent>    directionalChangeEvent;
 
     public Constant(Double value)
     {
         this.value = value;
-        directionalChangeEvent = new ArrayList<EEvent>();
-    }
-
-    public Constant(Double value, List<EEvent> eventList)
-    {
-        this.value = value;
-        directionalChangeEvent = eventList;
     }
 
     @Override
@@ -46,16 +39,6 @@ public class Constant implements IExpression {
     @Override
     public void setChildren(IExpression[] children) {}
 
-    public void addDCEvent(EEvent event)
-    {
-        directionalChangeEvent.add(event);
-    }
-
-    public List<EEvent> getDCEvent()
-    {
-        return directionalChangeEvent;
-    }
-
     @Override
     public int             getNumberChildren(){
         return 0;
@@ -68,8 +51,11 @@ public class Constant implements IExpression {
     }
 
     @Override
-    public Boolean evaluate(int index) {
-        if (index <= directionalChangeEvent.size())
+    public Boolean evaluate(int index, Hashtable<Double, List<EEvent>> dcData) {
+        List<EEvent>        directionalChangeEvent;
+
+        directionalChangeEvent = dcData.get(value);
+        if (directionalChangeEvent!= null && index <= directionalChangeEvent.size())
         {
             switch (directionalChangeEvent.get(index))
             {
@@ -88,6 +74,6 @@ public class Constant implements IExpression {
 
     @Override
     public IExpression clone() {
-        return this;
+        return new Constant(value);
     }
 }

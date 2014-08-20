@@ -1,11 +1,14 @@
 package GP;
 
 import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import properties.PropertiesGp;
 import syntax.PrimitiveSet;
 
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -13,35 +16,37 @@ import java.util.Random;
  */
 public class GP{
 
-    private Random          rd;
-    private PrimitiveSet    primitiveSet;
-    private Population      population;
-    private Market          market;
+    private Random                          rd;
+    private PrimitiveSet                    primitiveSet;
+    private Population                      population;
+    private Market                          market;
+    private Hashtable<Double, List<EEvent>> dcData;
 
-    private int             populationSize;
-    private int             maxDepthSizeInitial;
-    private int             maxDepthSize;
-    private int             tournamentSize;
-    private int             numberOfGeneration;
-    private double          elitismPercentage;
-    private double          reproductionProbability;
-    private double          mutationProbability;
-    private double          terminalNodeBias;
-    private double          primProbability;
+    private int                             populationSize;
+    private int                             maxDepthSizeInitial;
+    private int                             maxDepthSize;
+    private int                             tournamentSize;
+    private int                             numberOfGeneration;
+    private double                          elitismPercentage;
+    private double                          reproductionProbability;
+    private double                          mutationProbability;
+    private double                          terminalNodeBias;
+    private double                          primProbability;
 
-    private int             numberOfStock;
-    private double          numberOfMoney;
-    private int             numberOfTrainingValue;
-    private int             numberOfTestingValue;
+    private int                             numberOfStock;
+    private double                          numberOfMoney;
+    private int                             numberOfTrainingValue;
+    private int                             numberOfTestingValue;
 
-    private Fitness         bestFitness;
+    private Fitness                         bestFitness;
 
 
-    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market)
+    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market, Hashtable<Double, List<EEvent>> dcData)
     {
         rd = new Random();
         this.primitiveSet = primitiveSet;
         this.market = market;
+        this.dcData = dcData;
         population = new Population();
 
         Log.getInstance().log("\n===== Configuration GP =====");
@@ -88,17 +93,18 @@ public class GP{
         while (i < numberOfGeneration)
         {
             Log.getInstance().log("\n\n\n========== Run " + i + " ==========");
-            population.print();
 
-            population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market);
+            population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market, dcData);
             if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
                 bestFitness = population.getBestFitness();
+            //population.print();
 
             population.sortPopulation();
             if (i < numberOfGeneration + 1)
                 population = breed();
             i++;
         }
+        System.out.println("Best Fitness: " + bestFitness.getValue());
         validateIndividual();
     }
 
