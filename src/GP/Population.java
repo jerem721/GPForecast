@@ -1,9 +1,13 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import syntax.IExpression;
 import syntax.PrimitiveSet;
 
+import javax.rmi.CORBA.Util;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -13,7 +17,7 @@ public class Population {
 
     private List<Individual>    individuals;
     private Random              random;
-
+    private Fitness             bestFitness;
 
 
     public enum EPopulationGeneration{
@@ -45,12 +49,23 @@ public class Population {
         int     i;
 
         i = 1;
+        if (bestFitness != null)
+            Log.getInstance().log("Best Fitness: " + bestFitness.getValue());
         for (Individual individual : individuals)
         {
             Log.getInstance().log("\n===== Individual " + i + " =====");
             Log.getInstance().log(individual.print());
             i++;
         }
+    }
+
+    public void printBestFitness()
+    {
+        DecimalFormat df;
+
+        df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        Log.getInstance().log("Best fitness: " + df.format(bestFitness.getValue()));
     }
 
     public void createPopulation(EPopulationGeneration type, int numberOfPopulation, int depth, PrimitiveSet primitiveSet, double primpProb)
@@ -110,12 +125,34 @@ public class Population {
         return primitiveSet.getRandomTerminal();
     }
 
-    public void fitnessFunction()
+    public void fitnessFunction(double account, int stock, int numberOfTrainingValue, Market market, Hashtable<Double,
+            List<EEvent>> dcData)
     {
-        Iterator<Individual>       iterator;
+        Iterator<Individual>        iterator;
+        double                      fitness;
+        Individual                  individual;
 
+        bestFitness = new Fitness(0.0, null);
         for (iterator = individuals.iterator(); iterator.hasNext();)
-            iterator.next().evaluate();
+        {
+            individual = iterator.next();
+            fitness = individual.evaluate(account, stock, numberOfTrainingValue, market, dcData);
+            if (bestFitness.getValue() <= fitness)
+            {
+                bestFitness.setValue(fitness);
+                bestFitness.setTree(individual.getTreeRoot());
+            }
+        }
+    }
+
+    public Fitness getBestFitness()
+    {
+        return bestFitness;
+    }
+
+    public void setBestFitness(Fitness bestFitness)
+    {
+        this.bestFitness = bestFitness;
     }
 
     public void sortPopulation()

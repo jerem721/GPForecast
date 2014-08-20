@@ -45,7 +45,7 @@ public class PrimitiveSet {
 
     public IExpression getRandomTerminal()
     {
-        return terminalSet.get(random.nextInt(terminalSet.size()));
+        return terminalSet.get(random.nextInt(terminalSet.size())).clone();
     }
 
     public IExpression getRandomFunction()

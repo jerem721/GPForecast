@@ -1,9 +1,15 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import properties.PropertiesGp;
 import syntax.PrimitiveSet;
 
+import java.text.DecimalFormat;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -11,29 +17,37 @@ import java.util.Random;
  */
 public class GP{
 
-    private Random          rd;
-    private PrimitiveSet    primitiveSet;
-    private Population      population;
+    private Random                          rd;
+    private PrimitiveSet                    primitiveSet;
+    private Population                      population;
+    private Market                          market;
+    private Hashtable<Double, List<EEvent>> dcData;
 
-    private int             populationSize;
-    private int             maxDepthSizeInitial;
-    private int             maxDepthSize;
-    private int             tournamentSize;
-    private int             numberOfGeneration;
-    private double          elitismPercentage;
-    private double          reproductionProbability;
-    private double          mutationProbability;
-    private double          terminalNodeBias;
-    private double          primProbability;
+    private int                             populationSize;
+    private int                             maxDepthSizeInitial;
+    private int                             maxDepthSize;
+    private int                             tournamentSize;
+    private int                             numberOfGeneration;
+    private double                          elitismPercentage;
+    private double                          reproductionProbability;
+    private double                          mutationProbability;
+    private double                          terminalNodeBias;
+    private double                          primProbability;
 
-    private int             numberOfRandomConstant;
-    private double          maxThresholdDC;
-    private double          minThresholdDC;
+    private int                             numberOfStock;
+    private double                          numberOfMoney;
+    private int                             numberOfTrainingValue;
+    private int                             numberOfTestingValue;
 
-    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet)
+    private Fitness                         bestFitness;
+
+
+    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market, Hashtable<Double, List<EEvent>> dcData)
     {
         rd = new Random();
         this.primitiveSet = primitiveSet;
+        this.market = market;
+        this.dcData = dcData;
         population = new Population();
 
         Log.getInstance().log("\n===== Configuration GP =====");
@@ -58,10 +72,16 @@ public class GP{
         Log.getInstance().log("Terminal node bias : " + terminalNodeBias);
         primProbability = propertiesGp.getDoubleProperty("primProbability", 0.6);
         Log.getInstance().log("Prim probability : " + primProbability);
+        numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
+        Log.getInstance().log("Number of stocks : " + numberOfStock);
+        numberOfMoney = propertiesGp.getDoubleProperty("numberOfMoney", 500);
+        Log.getInstance().log("Number of money : " + numberOfMoney);
+        numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
+        Log.getInstance().log("Number of training value : " + numberOfTrainingValue);
+        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
+        Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
 
-        numberOfRandomConstant = propertiesGp.getIntProperty("numberOfRandomConstant", 5);
-        maxThresholdDC = propertiesGp.getDoubleProperty("maxThresholdDC", 100);
-        minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
+        bestFitness = null;
     }
 
     public void start()
@@ -73,15 +93,19 @@ public class GP{
                 maxDepthSizeInitial, primitiveSet, primProbability);
         while (i < numberOfGeneration)
         {
-            Log.getInstance().log("\n\n\n========== Run " + i + " ==========");
-            population.print();
+            Log.getInstance().log("\n========== Run " + i + " ==========");
 
-            population.fitnessFunction();
+            population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market, dcData);
+            if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
+                bestFitness = population.getBestFitness();
+            population.printBestFitness();
+
             population.sortPopulation();
             if (i < numberOfGeneration + 1)
                 population = breed();
             i++;
         }
+        validateIndividual(numberOfMoney, numberOfStock);
     }
 
     private Population breed()
@@ -108,5 +132,43 @@ public class GP{
                 nextPopulation.addIndividual(population.crossover(tournamentSize, terminalNodeBias, maxDepthSize));
         }
         return nextPopulation;
+    }
+
+    private void validateIndividual(double account, int totalStock)
+    {
+        double          currentPrice;
+        int             numberOfStock;
+        boolean         buy;
+        double          fitness;
+        DecimalFormat   df;
+
+        if (bestFitness != null)
+        {
+            numberOfStock = 0;
+            currentPrice = 0.0;
+            for (int index = 0; index < numberOfTrainingValue + numberOfTestingValue; index++)
+            {
+                currentPrice = market.getPrice(index).getPrice();
+                buy = bestFitness.getTree().evaluate(index, dcData);
+                if (buy == true && account >= currentPrice && totalStock > 0)
+                {
+                    totalStock--;
+                    numberOfStock++;
+                    account -= currentPrice;
+                }else if (buy == false && numberOfStock > 0)
+                {
+                    totalStock++;
+                    numberOfStock--;
+                    account += currentPrice;
+                }
+            }
+            fitness = account + (numberOfStock * currentPrice);
+            df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            Log.getInstance().log("\n\n=== BEST PREDICTOR PROGRAM ===");
+            Log.getInstance().log("Training fitness: " + df.format(bestFitness.getValue()));
+            Log.getInstance().log("Testing fitness: " + df.format(fitness));
+            Log.getInstance().log(bestFitness.getTree().print(""));
+        }
     }
 }

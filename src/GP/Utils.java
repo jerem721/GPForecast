@@ -146,7 +146,7 @@ public class Utils {
 
     public static int getDepth(IExpression tree, IExpression node)
     {
-        return get_depth2(tree, node, 0);
+        return get_depth2(tree, node, 1);
     }
 
     public static List<IExpression> getNonBloatedNodes(List<IExpression> nodes, int maxDepthAllow)

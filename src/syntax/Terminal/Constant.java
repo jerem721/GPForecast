@@ -1,9 +1,11 @@
 package syntax.Terminal;
 
+import directionalChanges.algorithm.events.EEvent;
 import directionalChanges.algorithm.events.IEvent;
 import syntax.IExpression;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -13,18 +15,10 @@ public class Constant implements IExpression {
 
     private Double          value;              // threshold
     private IExpression     children[] = {};
-    private List<IEvent>    directionalChangeEvent;
 
     public Constant(Double value)
     {
         this.value = value;
-        directionalChangeEvent = new ArrayList<IEvent>();
-    }
-
-    public Constant(Double value, List<IEvent> eventList)
-    {
-        this.value = value;
-        directionalChangeEvent = eventList;
     }
 
     @Override
@@ -45,16 +39,6 @@ public class Constant implements IExpression {
     @Override
     public void setChildren(IExpression[] children) {}
 
-    public void addDCEvent(IEvent event)
-    {
-        directionalChangeEvent.add(event);
-    }
-
-    public List<IEvent> getDCEvent()
-    {
-        return directionalChangeEvent;
-    }
-
     @Override
     public int             getNumberChildren(){
         return 0;
@@ -67,15 +51,29 @@ public class Constant implements IExpression {
     }
 
     @Override
-    public Boolean evaluate() {
-       return true;
+    public Boolean evaluate(int index, Hashtable<Double, List<EEvent>> dcData) {
+        List<EEvent>        directionalChangeEvent;
+
+        directionalChangeEvent = dcData.get(value);
+        if (directionalChangeEvent!= null && index <= directionalChangeEvent.size())
+        {
+            switch (directionalChangeEvent.get(index))
+            {
+                case DOWNTURN:
+                    return false;
+                case DOWNTURN_OVERSHOOT:
+                    return false;
+                case UPTURN:
+                    return true;
+                case UPTURN_OVERSHOOT:
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public IExpression clone() {
-        Constant        constant;
-
-        constant = new Constant(value);
-        return constant;
+        return new Constant(value);
     }
 }

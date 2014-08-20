@@ -1,6 +1,11 @@
 package GP;
 
+import directionalChanges.algorithm.Market;
+import directionalChanges.algorithm.events.EEvent;
 import syntax.IExpression;
+
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Created by jerem on 11/08/14.
@@ -16,14 +21,40 @@ public class Individual implements Comparable<Individual>{
         fitness = 0.0;
     }
 
-    public Boolean evaluate()
+    public double evaluate(double account, int totalStock, int numberOfTrainingValue, Market market,
+                           Hashtable<Double, List<EEvent>> dcData)
     {
-        return treeRoot.evaluate();
+        double  currentPrice;
+        int     numberOfStock;
+        boolean buy;
+
+        numberOfStock = 0;
+        currentPrice = 0.0;
+        for (int index = 0; index <= numberOfTrainingValue; index++)
+        {
+            currentPrice = market.getPrice(index).getPrice();
+            buy = treeRoot.evaluate(index, dcData);
+            if (buy == true && account >= currentPrice && totalStock > 0)
+            {
+                totalStock--;
+                numberOfStock++;
+                account -= currentPrice;
+            }else if (buy == false && numberOfStock > 0)
+            {
+                totalStock++;
+                numberOfStock--;
+                account += currentPrice;
+            }
+        }
+        fitness = account + (numberOfStock * currentPrice);
+        return fitness;
     }
 
     public String print()
     {
-        return treeRoot.print("");
+        return "Fitness: " + fitness +
+               "\n" + treeRoot.print("");
+        //return "Fitness: " + fitness;
     }
 
     public IExpression getTreeRoot()
@@ -58,9 +89,9 @@ public class Individual implements Comparable<Individual>{
     @Override
     public int compareTo(Individual o) {
         if (fitness > o.getFitness())
-            return 1;
-        if (fitness < o.getFitness())
             return -1;
+        if (fitness < o.getFitness())
+            return 1;
         return  0;
     }
 }

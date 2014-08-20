@@ -14,7 +14,6 @@ import directionalChanges.algorithm.runs.*;
 public class Algorithm2 {
 
     private Market                          market;
-    private double                          threshold;
 
     private OnDirectionalChangeListener     listener;
 
@@ -55,7 +54,6 @@ public class Algorithm2 {
     public void launch(double threshold){
         Price       currentPrice;
 
-        this.threshold = threshold;
         if (market.isNext())
         {
 
@@ -119,6 +117,20 @@ public class Algorithm2 {
                     }
                 }
             }
+            if (currentRun instanceof UpwardRun && listener != null)
+            {
+                upturnOvershootEvent.setEndingPoint(market.getIndex(), market.getPrice(market.getIndex()));
+                upwardRun.setOvershootEvent(upturnOvershootEvent);
+                listener.onUpwardRun(currentRun);
+            }
+            else if (currentRun instanceof DownwardRun && listener != null)
+            {
+                downturnOvershootEvent.setEndingPoint(market.getIndex(), market.getPrice(market.getIndex()));
+                downwardRun.setOvershootEvent(downturnOvershootEvent);
+                listener.onDownwardRun(currentRun);
+            }
+
+
         }
     }
 }
