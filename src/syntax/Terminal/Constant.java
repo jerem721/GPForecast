@@ -88,9 +88,6 @@ public class Constant implements IExpression {
 
     @Override
     public IExpression clone() {
-        Constant        constant;
-
-        constant = new Constant(value);
-        return constant;
+        return this;
     }
 }
