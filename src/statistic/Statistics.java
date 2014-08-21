@@ -41,7 +41,7 @@ public class Statistics {
 
         Log.getInstance().changePathLog(dir, "statistics.txt");
         Log.getInstance().log("Training average: " + df.format(trainingFitnessAverage()));
-        Log.getInstance().log("Training average: " + df.format(testingFitnessAverage()));
+        Log.getInstance().log("Testing average: " + df.format(testingFitnessAverage()));
     }
 
     public double trainingFitnessAverage()
