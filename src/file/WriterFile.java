@@ -41,8 +41,10 @@ public class WriterFile extends AFile<FileWriter>
     {
         try
         {
-            if (getFileStream() != null)
+            if (getFileStream() != null) {
                 getFileStream().write(record + "\n");
+                getFileStream().flush();
+            }
         }
         catch(Exception e)
         {

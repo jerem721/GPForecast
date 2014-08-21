@@ -4,6 +4,7 @@ import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import properties.PropertiesGp;
+import statistic.Statistics;
 import syntax.PrimitiveSet;
 
 import java.text.DecimalFormat;
@@ -49,7 +50,6 @@ public class GP{
         this.primitiveSet = primitiveSet;
         this.market = market;
         this.dcData = dcData;
-        population = new Population();
 
         Log.getInstance().log("\n===== Configuration GP =====");
 
@@ -92,8 +92,11 @@ public class GP{
         int         i;
 
         i = 0;
+        population = new Population();
         population.createPopulation(Population.EPopulationGeneration.RAMPER_HALF_AND_HALF, populationSize,
                 maxDepthSizeInitial, primitiveSet, primProbability);
+        bestFitness = null;
+        market.resetMarket();
         while (i < numberOfGeneration)
         {
             Log.getInstance().log("\n========== Generation " + i + " ==========");
@@ -109,6 +112,7 @@ public class GP{
             i++;
         }
         validateIndividual(numberOfTestingMoney, numberOfStock);
+        Statistics.getInstance().addFitness(bestFitness);
     }
 
     private Population breed()
@@ -142,6 +146,7 @@ public class GP{
         double          currentPrice;
         int             numberOfStock;
         boolean         buy;
+        Boolean         oldAction;
         double          fitness;
         DecimalFormat   df;
 
@@ -149,29 +154,33 @@ public class GP{
         {
             numberOfStock = 0;
             currentPrice = 0.0;
+            oldAction = null;
             for (int index = numberOfTrainingValue; index < numberOfTrainingValue + numberOfTestingValue; index++)
             {
                 currentPrice = market.getPrice(index).getPrice();
                 buy = bestFitness.getTree().evaluate(index, dcData);
-                if (buy == true && account >= currentPrice && totalStock > 0)
+                if ((oldAction == null || oldAction == false) && buy == true && account >= currentPrice && totalStock > 0)
                 {
                     totalStock--;
                     numberOfStock++;
                     account -= currentPrice;
-                }else if (buy == false && numberOfStock > 0)
+                    oldAction = true;
+                }else if ((oldAction == null || oldAction == true) && buy == false && numberOfStock > 0)
                 {
                     totalStock++;
                     numberOfStock--;
                     account += currentPrice;
+                    oldAction = false;
                 }
             }
             fitness = account + (numberOfStock * currentPrice);
             df = new DecimalFormat();
             df.setMaximumFractionDigits(2);
             Log.getInstance().log("\n\n=== BEST PREDICTOR PROGRAM ===");
-            Log.getInstance().log("Training fitness: " + df.format(bestFitness.getValue()));
+            Log.getInstance().log("Training fitness: " + df.format(bestFitness.getTrainingValue()));
             Log.getInstance().log("Testing fitness: " + df.format(fitness));
             Log.getInstance().log(bestFitness.getTree().print(""));
+            bestFitness.setTestingValue(fitness);
         }
     }
 }

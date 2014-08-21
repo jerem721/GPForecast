@@ -7,25 +7,35 @@ import syntax.IExpression;
  */
 public class Fitness{
 
-    private double      value;
+    private double      trainingValue;
+    private double      testingValue;
     private IExpression tree;
 
     public Fitness() {
-        value = 0.0;
+        trainingValue = 0.0;
+        testingValue = 0.0;
         tree = null;
     }
 
     public Fitness(double value, IExpression tree) {
-        this.value = value;
+        this.trainingValue = value;
         this.tree = tree;
     }
 
-    public double getValue() {
-        return value;
+    public double getTrainingValue() {
+        return trainingValue;
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    public void setTrainingValue(double trainingValue) {
+        this.trainingValue = trainingValue;
+    }
+
+    public double getTestingValue() {
+        return testingValue;
+    }
+
+    public void setTestingValue(double testingValue) {
+        this.testingValue = testingValue;
     }
 
     public IExpression getTree() {
@@ -37,7 +47,7 @@ public class Fitness{
     }
 
     public boolean isBest(Fitness fitness) {
-        if (fitness.getValue() > value)
+        if (fitness.getTrainingValue() > trainingValue)
             return true;
         return false;
     }

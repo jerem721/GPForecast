@@ -5,9 +5,11 @@ import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.EEvent;
 import directionalChanges.algorithm.events.IEvent;
 import directionalChanges.algorithm.runs.IRun;
+import file.AFile;
 import file.ReaderFile;
 import logger.Log;
 import properties.PropertiesGp;
+import statistic.Statistics;
 import syntax.Function.EFunction;
 import syntax.PrimitiveSet;
 import syntax.Terminal.Constant;
@@ -32,8 +34,6 @@ public class GPForecast {
     public static void main(String[] args) {
         GPForecast GPForecast;
 
-        Log.getInstance().enableLog(true);
-
         GPForecast = new GPForecast();
         GPForecast.launch(args);
     }
@@ -49,29 +49,39 @@ public class GPForecast {
         else
             propertiesGp = new PropertiesGp();
 
-        Log.getInstance().log("===== Configuration DC =====");
-        Log.getInstance().log("Data file : " + args[0]);
-        Log.getInstance().log("Output dir : " + args[1]);
-        numberOfRandomConstant = propertiesGp.getIntProperty("numberOfRandomConstant", 5);
-        Log.getInstance().log("Number of random constant : " + numberOfRandomConstant);
-        maxThresholdDC = propertiesGp.getDoubleProperty("maxThresholdDC", 100);
-        Log.getInstance().log("Maximum threshold : " + maxThresholdDC);
-        minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
-        Log.getInstance().log("Minimum threshold : " + minThresholdDC);
+        Log.getInstance().enableLog(true);
+        Log.getInstance().logInFile(true, args[1]);
 
-        dcData = new Hashtable<Double, List<EEvent>>();
-        primitiveSet = new PrimitiveSet();
 
-        market = new Market();
-        initMarket(args[0]);
+        for (int i = 1; i <= 30; i++)
+        {
+            Log.getInstance().changePathLog(args[1] + "/Run" + i, "results.txt");
+            Log.getInstance().log("===== Configuration DC =====");
+            Log.getInstance().log("Data file : " + args[0]);
+            Log.getInstance().log("Output dir : " + args[1]);
+            numberOfRandomConstant = propertiesGp.getIntProperty("numberOfRandomConstant", 5);
+            Log.getInstance().log("Number of random constant : " + numberOfRandomConstant);
+            maxThresholdDC = propertiesGp.getDoubleProperty("maxThresholdDC", 100);
+            Log.getInstance().log("Maximum threshold : " + maxThresholdDC);
+            minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
+            Log.getInstance().log("Minimum threshold : " + minThresholdDC);
 
-        gp = new GP(propertiesGp, primitiveSet, market, dcData);
-        dc = new DirectionalChanges(args[1], market);
+            dcData = new Hashtable<Double, List<EEvent>>();
+            primitiveSet = new PrimitiveSet();
 
-        initFunctionSet(primitiveSet);
-        initTerminalSet(primitiveSet);
+            market = new Market();
+            initMarket(args[0]);
 
-        gp.start();
+            gp = new GP(propertiesGp, primitiveSet, market, dcData);
+            AFile.createDirectory(args[1] + "/Run" + i + "/dc");
+            dc = new DirectionalChanges(args[1] + "/Run" + i + "/dc", market);
+
+            initFunctionSet(primitiveSet);
+            initTerminalSet(primitiveSet);
+
+            gp.start();
+        }
+        Statistics.getInstance().computeStatistics(args[1]);
     }
 
     private void initFunctionSet(PrimitiveSet primitiveSet)

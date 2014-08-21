@@ -27,23 +27,27 @@ public class Individual implements Comparable<Individual>{
         double  currentPrice;
         int     numberOfStock;
         boolean buy;
+        Boolean oldAction;
 
         numberOfStock = 0;
         currentPrice = 0.0;
+        oldAction = null;
         for (int index = 0; index <= numberOfTrainingValue; index++)
         {
             currentPrice = market.getPrice(index).getPrice();
             buy = treeRoot.evaluate(index, dcData);
-            if (buy == true && account >= currentPrice && totalStock > 0)
+            if ((oldAction == null || oldAction == false) && buy == true && account >= currentPrice && totalStock > 0)
             {
                 totalStock--;
                 numberOfStock++;
                 account -= currentPrice;
-            }else if (buy == false && numberOfStock > 0)
+                oldAction = true;
+            }else if ((oldAction == null || oldAction == true) && buy == false && numberOfStock > 0)
             {
                 totalStock++;
                 numberOfStock--;
                 account += currentPrice;
+                oldAction = false;
             }
         }
         fitness = account + (numberOfStock * currentPrice);
