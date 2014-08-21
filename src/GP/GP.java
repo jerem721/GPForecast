@@ -35,7 +35,8 @@ public class GP{
     private double                          primProbability;
 
     private int                             numberOfStock;
-    private double                          numberOfMoney;
+    private double                          numberOfTrainingMoney;
+    private double                          numberOfTestingMoney;
     private int                             numberOfTrainingValue;
     private int                             numberOfTestingValue;
 
@@ -53,33 +54,35 @@ public class GP{
         Log.getInstance().log("\n===== Configuration GP =====");
 
         populationSize = propertiesGp.getIntProperty("populationSize", 20);
-        Log.getInstance().log("Population size : " + populationSize);
+        Log.getInstance().log("Population size: " + populationSize);
         maxDepthSize = propertiesGp.getIntProperty("maxDepthSize", 8);
-        Log.getInstance().log("Max depth size : " + maxDepthSize);
+        Log.getInstance().log("Max depth size: " + maxDepthSize);
         maxDepthSizeInitial = propertiesGp.getIntProperty(" maxDepthSizeInitial", 5);
-        Log.getInstance().log("Max depth size initial : " + maxDepthSizeInitial);
+        Log.getInstance().log("Max depth size initial: " + maxDepthSizeInitial);
         tournamentSize = propertiesGp.getIntProperty("tournamentSize", 2);
-        Log.getInstance().log("Tournament size : " + tournamentSize);
+        Log.getInstance().log("Tournament size: " + tournamentSize);
         numberOfGeneration = propertiesGp.getIntProperty("numberOfGeneration", 30);
-        Log.getInstance().log("Number of generation : " + numberOfGeneration);
+        Log.getInstance().log("Number of generation: " + numberOfGeneration);
         elitismPercentage = propertiesGp.getDoubleProperty("elitismPercentage", 0.01);
-        Log.getInstance().log("Elitism percentage : " + elitismPercentage);
+        Log.getInstance().log("Elitism percentage: " + elitismPercentage);
         reproductionProbability = propertiesGp.getDoubleProperty("reproductionProbability", 0.01);
-        Log.getInstance().log("Reproduction probability : " + reproductionProbability);
+        Log.getInstance().log("Reproduction probability: " + reproductionProbability);
         mutationProbability = propertiesGp.getDoubleProperty("mutationProbability", 0.01);
-        Log.getInstance().log("Mutation probability : " + mutationProbability);
+        Log.getInstance().log("Mutation probability: " + mutationProbability);
         terminalNodeBias = propertiesGp.getDoubleProperty("terminalNodeBias", 0.1);
-        Log.getInstance().log("Terminal node bias : " + terminalNodeBias);
+        Log.getInstance().log("Terminal node bias: " + terminalNodeBias);
         primProbability = propertiesGp.getDoubleProperty("primProbability", 0.6);
-        Log.getInstance().log("Prim probability : " + primProbability);
+        Log.getInstance().log("Prim probability: " + primProbability);
         numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
-        Log.getInstance().log("Number of stocks : " + numberOfStock);
-        numberOfMoney = propertiesGp.getDoubleProperty("numberOfMoney", 500);
-        Log.getInstance().log("Number of money : " + numberOfMoney);
+        Log.getInstance().log("Number of stocks: " + numberOfStock);
+        numberOfTrainingMoney = propertiesGp.getDoubleProperty("numberOfTrainingMoney", 500);
+        Log.getInstance().log("Number of money (training): " + numberOfTrainingMoney);
+        numberOfTestingMoney = propertiesGp.getDoubleProperty("numberOfTestingMoney", 500);
+        Log.getInstance().log("Number of money (testing): " + numberOfTestingMoney);
         numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
-        Log.getInstance().log("Number of training value : " + numberOfTrainingValue);
+        Log.getInstance().log("Number of training value: " + numberOfTrainingValue);
         numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
-        Log.getInstance().log("Number of testing value : " + numberOfTestingValue);
+        Log.getInstance().log("Number of testing value: " + numberOfTestingValue);
 
         bestFitness = null;
     }
@@ -93,9 +96,9 @@ public class GP{
                 maxDepthSizeInitial, primitiveSet, primProbability);
         while (i < numberOfGeneration)
         {
-            Log.getInstance().log("\n========== Run " + i + " ==========");
+            Log.getInstance().log("\n========== Generation " + i + " ==========");
 
-            population.fitnessFunction(numberOfMoney, numberOfStock, numberOfTrainingValue, market, dcData);
+            population.fitnessFunction(numberOfTrainingMoney, numberOfStock, numberOfTrainingValue, market, dcData);
             if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
                 bestFitness = population.getBestFitness();
             population.printBestFitness();
@@ -105,7 +108,7 @@ public class GP{
                 population = breed();
             i++;
         }
-        validateIndividual(numberOfMoney, numberOfStock);
+        validateIndividual(numberOfTestingMoney, numberOfStock);
     }
 
     private Population breed()
@@ -146,7 +149,7 @@ public class GP{
         {
             numberOfStock = 0;
             currentPrice = 0.0;
-            for (int index = 0; index < numberOfTrainingValue + numberOfTestingValue; index++)
+            for (int index = numberOfTrainingValue; index < numberOfTrainingValue + numberOfTestingValue; index++)
             {
                 currentPrice = market.getPrice(index).getPrice();
                 buy = bestFitness.getTree().evaluate(index, dcData);
