@@ -50,7 +50,7 @@ public class Population {
 
         i = 1;
         if (bestFitness != null)
-            Log.getInstance().log("Best Fitness: " + bestFitness.getValue());
+            Log.getInstance().log("Best Fitness: " + bestFitness.getTrainingValue());
         for (Individual individual : individuals)
         {
             Log.getInstance().log("\n===== Individual " + i + " =====");
@@ -65,7 +65,7 @@ public class Population {
 
         df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
-        Log.getInstance().log("Best fitness: " + df.format(bestFitness.getValue()));
+        Log.getInstance().log("Best fitness: " + df.format(bestFitness.getTrainingValue()));
     }
 
     public void createPopulation(EPopulationGeneration type, int numberOfPopulation, int depth, PrimitiveSet primitiveSet, double primpProb)
@@ -137,9 +137,9 @@ public class Population {
         {
             individual = iterator.next();
             fitness = individual.evaluate(account, stock, numberOfTrainingValue, market, dcData);
-            if (bestFitness.getValue() <= fitness)
+            if (bestFitness.getTrainingValue() <= fitness)
             {
-                bestFitness.setValue(fitness);
+                bestFitness.setTrainingValue(fitness);
                 bestFitness.setTree(individual.getTreeRoot());
             }
         }

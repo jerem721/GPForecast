@@ -60,11 +60,11 @@ public class Constant implements IExpression {
             switch (directionalChangeEvent.get(index))
             {
                 case DOWNTURN:
-                    return false;
+                    return true;
                 case DOWNTURN_OVERSHOOT:
                     return false;
                 case UPTURN:
-                    return true;
+                    return false;
                 case UPTURN_OVERSHOOT:
                     return true;
             }
