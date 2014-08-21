@@ -113,7 +113,8 @@ public class GPForecast {
         {
             dcListener = new DCListener();
             dc.setListener(dcListener);
-            threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
+            //threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
+            threshold = Double.parseDouble(df.format(Math.round((((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC) / 0.05)) * 0.05));
             dc.start(threshold);
             primitiveSet.addTerminal(new Constant(new Double(threshold)));
             dcData.put(threshold, dcListener.getEvents());
