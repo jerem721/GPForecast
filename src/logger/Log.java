@@ -37,7 +37,8 @@ public class Log {
     public void logInFile(boolean enable, String dir)
     {
         logInFile = enable;
-        AFile.deleteDirectory(dir);
+        if (enable == true)
+            AFile.deleteDirectory(dir);
     }
 
     public void changePathLog(String nameDir, String nameFile)

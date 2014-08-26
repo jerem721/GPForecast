@@ -30,6 +30,7 @@ public class GPForecast {
     private PrimitiveSet                        primitiveSet;
     private GP                                  gp;
     private Hashtable<Double, List<EEvent>>     dcData;
+    private Statistics                          statistics;
 
     public static void main(String[] args) {
         GPForecast GPForecast;
@@ -51,7 +52,10 @@ public class GPForecast {
 
         Log.getInstance().enableLog(true);
         Log.getInstance().logInFile(true, args[1]);
+        statistics = new Statistics(args[1]);
 
+        market = new Market();
+        initMarket(args[0]);
 
         for (int i = 1; i <= 30; i++)
         {
@@ -69,10 +73,7 @@ public class GPForecast {
             dcData = new Hashtable<Double, List<EEvent>>();
             primitiveSet = new PrimitiveSet();
 
-            market = new Market();
-            initMarket(args[0]);
-
-            gp = new GP(propertiesGp, primitiveSet, market, dcData);
+            gp = new GP(propertiesGp, primitiveSet, market, dcData, statistics);
             AFile.createDirectory(args[1] + "/Run" + i + "/dc");
             dc = new DirectionalChanges(args[1] + "/Run" + i + "/dc", market);
 
@@ -81,7 +82,8 @@ public class GPForecast {
 
             gp.start();
         }
-        Statistics.getInstance().computeStatistics(args[1]);
+        statistics.computeStatistics(args[1]);
+        resultWithoutGP(args[1]);
     }
 
     private void initFunctionSet(PrimitiveSet primitiveSet)
@@ -113,7 +115,6 @@ public class GPForecast {
         {
             dcListener = new DCListener();
             dc.setListener(dcListener);
-            //threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
             threshold = Double.parseDouble(df.format(Math.round((((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC) / 0.05)) * 0.05));
             dc.start(threshold);
             primitiveSet.addTerminal(new Constant(new Double(threshold)));
@@ -132,6 +133,18 @@ public class GPForecast {
         for (Map.Entry<Integer, String> price : stockPrices.entrySet())
             market.addPrice(Double.parseDouble(price.getValue()));
         input.close();
+    }
+
+    private void resultWithoutGP(String dir){
+        String              thresholds[];
+        ForecastThreshold   forecast;
+
+        thresholds = propertiesGp.getStringProperty("thresholdWithoutGP", "1 2 3 4").split(" ");
+        Log.getInstance().logInFile(false, null);
+        AFile.createDirectory(dir + "/RunWithoutGP");
+        forecast = new ForecastThreshold(propertiesGp, market, statistics);
+        for (String threshold : thresholds)
+            forecast.computeFitness(Double.parseDouble(threshold), dir + "/RunWithoutGP/");
     }
 
 }

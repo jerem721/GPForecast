@@ -69,4 +69,14 @@ public class PropertiesGp {
             return defaultValue;
         return Double.parseDouble(value);
     }
+
+    public String getStringProperty(String key, String defaultValue)
+    {
+        String  value;
+
+        value = properties.getProperty(key);
+        if (value == null)
+            return defaultValue;
+        return value;
+    }
 }

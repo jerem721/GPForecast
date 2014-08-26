@@ -5,6 +5,7 @@ import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
 import properties.PropertiesGp;
 import statistic.Statistics;
+import syntax.IExpression;
 import syntax.PrimitiveSet;
 
 import java.text.DecimalFormat;
@@ -23,6 +24,7 @@ public class GP{
     private Population                      population;
     private Market                          market;
     private Hashtable<Double, List<EEvent>> dcData;
+    private Statistics                      statistics;
 
     private int                             populationSize;
     private int                             maxDepthSizeInitial;
@@ -44,12 +46,14 @@ public class GP{
     private Fitness                         bestFitness;
 
 
-    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market, Hashtable<Double, List<EEvent>> dcData)
+    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market, Hashtable<Double,
+            List<EEvent>> dcData, Statistics statistics)
     {
         rd = new Random();
         this.primitiveSet = primitiveSet;
         this.market = market;
         this.dcData = dcData;
+        this.statistics = statistics;
 
         Log.getInstance().log("\n===== Configuration GP =====");
 
@@ -112,7 +116,7 @@ public class GP{
             i++;
         }
         validateIndividual(numberOfTestingMoney, numberOfStock);
-        Statistics.getInstance().addFitness(bestFitness);
+        statistics.addFitness(bestFitness);
     }
 
     private Population breed()
@@ -159,13 +163,13 @@ public class GP{
             {
                 currentPrice = market.getPrice(index).getPrice();
                 buy = bestFitness.getTree().evaluate(index, dcData);
-                if ((oldAction == null || oldAction == false) && buy == true && account >= currentPrice && totalStock > 0)
+                if (/*(oldAction == null || oldAction == false) &&*/ buy == true && account >= currentPrice && totalStock > 0)
                 {
                     totalStock--;
                     numberOfStock++;
                     account -= currentPrice;
                     oldAction = true;
-                }else if ((oldAction == null || oldAction == true) && buy == false && numberOfStock > 0)
+                }else if (/*(oldAction == null || oldAction == true) &&*/ buy == false && numberOfStock > 0)
                 {
                     totalStock++;
                     numberOfStock--;

@@ -36,13 +36,13 @@ public class Individual implements Comparable<Individual>{
         {
             currentPrice = market.getPrice(index).getPrice();
             buy = treeRoot.evaluate(index, dcData);
-            if ((oldAction == null || oldAction == false) && buy == true && account >= currentPrice && totalStock > 0)
+            if (/*(oldAction == null || oldAction == false) &&*/ buy == true && account >= currentPrice && totalStock > 0)
             {
                 totalStock--;
                 numberOfStock++;
                 account -= currentPrice;
                 oldAction = true;
-            }else if ((oldAction == null || oldAction == true) && buy == false && numberOfStock > 0)
+            }else if (/*(oldAction == null || oldAction == true) &&*/ buy == false && numberOfStock > 0)
             {
                 totalStock++;
                 numberOfStock--;

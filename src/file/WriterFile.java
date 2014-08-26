@@ -26,6 +26,17 @@ public class WriterFile extends AFile<FileWriter>
         return null;
     }
 
+    public FileWriter openToAppend() {
+        if (!AFile.isExist(getFilePath()))
+            AFile.createFile(getFilePath());
+        try {
+            return new FileWriter(getFilePath(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public void close()
     {
