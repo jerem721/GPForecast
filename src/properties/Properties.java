@@ -41,7 +41,8 @@ public class Properties {
     public void close()
     {
         try {
-            fileReader.close();
+            if (fileReader != null)
+		fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,6 +53,8 @@ public class Properties {
         int     intValue;
         String  value;
 
+	if (properties == null)
+	    return defaultValue;
         value = properties.getProperty(key);
         if (value == null)
             return defaultValue;
@@ -63,6 +66,8 @@ public class Properties {
         double  doubleValue;
         String  value;
 
+	if (properties == null)
+	    return defaultValue;
         value = properties.getProperty(key);
         if (value == null)
             return defaultValue;
@@ -73,6 +78,8 @@ public class Properties {
     {
         String  value;
 
+	if (properties == null)
+	    return defaultValue;
         value = properties.getProperty(key);
         if (value == null)
             return defaultValue;
