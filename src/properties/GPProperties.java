@@ -132,7 +132,7 @@ public class GPProperties {
         StringBuilder   str;
 
         str = new StringBuilder();
-        str.append("===== Configuration GP =====\n");
+        str.append("===== GP Configuration =====\n");
         str.append("Output dir: ").append(outFolder).append("\n");
         str.append("Number of random threshold: ").append(numberOfRandomThreshold).append("\n");;
         str.append("Population size: ").append(populationSize).append("\n");

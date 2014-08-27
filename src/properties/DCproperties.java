@@ -56,7 +56,7 @@ public class DCProperties {
         StringBuilder   str;
 
         str = new StringBuilder();
-        str.append("===== Configuration DC =====\n");
+        str.append("===== DC Configuration =====\n");
         str.append("Data file: ").append(inputFile).append("\n");
         str.append("Output dir: ").append(outFolder).append("\n");
         str.append("Maximum threshold: ").append(maxThresholdDC).append("\n");
