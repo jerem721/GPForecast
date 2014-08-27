@@ -2,7 +2,7 @@ import directionalChanges.DirectionalChanges;
 import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
-import properties.PropertiesGp;
+import properties.GPProperties;
 import statistic.Statistics;
 import syntax.IExpression;
 import syntax.Terminal.Constant;
@@ -12,7 +12,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Created by jerem on 26/08/14.
+ * Class to evaluate the training and testing data with a specified threshold.
  */
 public class ForecastThreshold {
 
@@ -25,17 +25,20 @@ public class ForecastThreshold {
     private Statistics  statistics;
     private Market      market;
 
-    public ForecastThreshold(PropertiesGp  propertiesGp, Market market, Statistics statistics) {
+    public ForecastThreshold(GPProperties gpProperties, Market market, Statistics statistics) {
         this.statistics = statistics;
         this.market = market;
 
-        numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
-        numberOfTrainingMoney = propertiesGp.getDoubleProperty("numberOfTrainingMoney", 500);
-        numberOfTestingMoney = propertiesGp.getDoubleProperty("numberOfTestingMoney", 500);
-        numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
-        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
+        numberOfStock =  gpProperties.getNumberOfStock();
+        numberOfTrainingMoney = gpProperties.getNumberOfTrainingMoney();
+        numberOfTestingMoney = gpProperties.getNumberOfTestingMoney();
+        numberOfTrainingValue = gpProperties.getNumberOfTrainingValue();
+        numberOfTestingValue = gpProperties.getNumberOfTestingValue();
     }
 
+    /**
+     * Compute the fitness of the specified threshold.
+     */
     public void computeFitness(double threshold, String dir){
         Hashtable<Double, List<EEvent>> dcData;
         DCListener                      dcListener;
@@ -54,6 +57,9 @@ public class ForecastThreshold {
         testingFitness(numberOfTestingMoney, numberOfStock, dcData, new Constant(threshold));
     }
 
+    /**
+     * Compute the fitness with the training data.
+     */
     public void trainingFitness(double money, int totalOfStock, Hashtable<Double, List<EEvent>> events, IExpression expression)
     {
         int             from;
@@ -70,6 +76,9 @@ public class ForecastThreshold {
         Log.getInstance().log("Training fitness: " + df.format(fitness));
     }
 
+    /**
+     * Compute the fitness with the testing data.
+     */
     public void testingFitness(double money, int totalOfStock, Hashtable<Double, List<EEvent>> events, IExpression expression)
     {
         int             from;
@@ -93,27 +102,23 @@ public class ForecastThreshold {
         double          currentPrice;
         int             numberOfStock;
         boolean         buy;
-        Boolean         oldAction;
 
         numberOfStock = 0;
         currentPrice = 0.0;
-        oldAction = null;
         for (int index = from; index < to; index++)
         {
             currentPrice = market.getPrice(index).getPrice();
             buy = expression.evaluate(index, events);
-            if (/*(oldAction == null || oldAction == false) &&*/ buy == true && account >= currentPrice && totalStock > 0)
+            if (buy == true && account >= currentPrice && totalStock > 0)
             {
                 totalStock--;
                 numberOfStock++;
                 account -= currentPrice;
-                oldAction = true;
-            }else if (/*(oldAction == null || oldAction == true) &&*/ buy == false && numberOfStock > 0)
+            }else if (buy == false && numberOfStock > 0)
             {
                 totalStock++;
                 numberOfStock--;
                 account += currentPrice;
-                oldAction = false;
             }
         }
         return account + (numberOfStock * currentPrice);

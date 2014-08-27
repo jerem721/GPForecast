@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jerem on 21/08/14.
+ * Class to compute some statistics (training fitness average, testing fitness average).
  */
 public class Statistics {
 
@@ -40,7 +40,7 @@ public class Statistics {
         df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
 
-        writerFile.write("======= With GP ======");
+        writerFile.write("======= Fitness with GP ======");
         writerFile.write("Training average: " + df.format(trainingFitnessAverage()));
         writerFile.write("Testing average: " + df.format(testingFitnessAverage()));
     }

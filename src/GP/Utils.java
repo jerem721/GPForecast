@@ -12,6 +12,9 @@ import java.util.Random;
  */
 public class Utils {
 
+    /**
+     * Add each node of the specified GDT in the specified list.
+     */
     public static void traverse(IExpression expression, List nodes)
     {
         IExpression     children[];
@@ -22,6 +25,9 @@ public class Utils {
             traverse(child, nodes);
     }
 
+    /**
+     * Add each terminal and functional node of the specified GDT in the specified functional and terminal list.
+     */
     public static void traverse(IExpression expression, List functionNode, List terminalNode)
     {
         IExpression     children[];
@@ -37,6 +43,9 @@ public class Utils {
         }
     }
 
+    /**
+     * Select a random node from the specified GDT.
+     */
     static public IExpression selectRandomNode(IExpression tree, Random random)
     {
         List<IExpression>       nodes;
@@ -46,6 +55,9 @@ public class Utils {
         return nodes.get(random.nextInt(nodes.size()));
     }
 
+    /**
+     * Select a random node from the specified GDT.
+     */
     static public IExpression selectRandomNode(IExpression tree, double terminalNodeBias, Random random)
     {
         List<IExpression> functionNodes = new ArrayList<IExpression>();
@@ -59,6 +71,9 @@ public class Utils {
         return terminalNodes.get(random.nextInt(terminalNodes.size()));
     }
 
+    /**
+     * Select a random node from the specified GDT.
+     */
     static public IExpression selectRandomNode(IExpression tree, int maxDepthAllow, Random random)
     {
         List<IExpression> functionNodes = new ArrayList<IExpression>();
@@ -73,6 +88,9 @@ public class Utils {
         return terminalNodes.get(random.nextInt(terminalNodes.size()));
     }
 
+    /**
+     * Replace a node by another node in the specified individual.
+     */
     public static void replace(Individual individual, IExpression oldNode, IExpression newNode)
     {
         if (individual.getTreeRoot() == oldNode)
@@ -81,6 +99,9 @@ public class Utils {
             replace(individual.getTreeRoot(), oldNode, newNode);
     }
 
+    /**
+     * Replace a node by another node in the specified GDT.
+     */
     public static void replace(IExpression currentNode, IExpression oldNode, IExpression newNode)
     {
         IExpression     children[];
@@ -119,6 +140,9 @@ public class Utils {
         return treeDepth;
     }
 
+    /**
+     * Compute the depth of the specified GDT.
+     */
     public static int getDepth(IExpression node)
     {
         return get_depth(node, 1, 1);
@@ -144,11 +168,17 @@ public class Utils {
         return 0;
     }
 
+    /**
+     * Compute the depth between two node of the specified GDT.
+     */
     public static int getDepth(IExpression tree, IExpression node)
     {
         return get_depth2(tree, node, 1);
     }
 
+    /**
+     * Return nodes that have a depth lower than the authorized depth.
+     */
     public static List<IExpression> getNonBloatedNodes(List<IExpression> nodes, int maxDepthAllow)
     {
         List<IExpression>   nonBloatedNodes;

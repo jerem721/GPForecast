@@ -20,6 +20,11 @@ public abstract class AFile<T> {
         fileStream = open();
     }
 
+    protected AFile(String filePath, boolean append)
+    {
+        this.filePath = filePath;
+    }
+
     public String getFilePath()
     {
         return this.filePath;

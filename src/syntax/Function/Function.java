@@ -5,7 +5,7 @@ import syntax.IExpression;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * Created by jerem on 11/08/14.
+ * Class to create an instance of function with a specified type.
  */
 public class Function {
 

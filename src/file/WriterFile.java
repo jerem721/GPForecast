@@ -14,6 +14,12 @@ public class WriterFile extends AFile<FileWriter>
         super(filePath);
     }
 
+    public WriterFile(String filePath, boolean append)
+    {
+        super(filePath, append);
+        fileStream = openToAppend(append);
+    }
+
     @Override
     public FileWriter open() {
         if (!AFile.isExist(getFilePath()))
@@ -26,11 +32,11 @@ public class WriterFile extends AFile<FileWriter>
         return null;
     }
 
-    public FileWriter openToAppend() {
+    public FileWriter openToAppend(boolean append) {
         if (!AFile.isExist(getFilePath()))
             AFile.createFile(getFilePath());
         try {
-            return new FileWriter(getFilePath(), true);
+            return new FileWriter(getFilePath(), append);
         } catch (IOException e) {
             e.printStackTrace();
         }

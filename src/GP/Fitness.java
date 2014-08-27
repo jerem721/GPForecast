@@ -3,7 +3,7 @@ package GP;
 import syntax.IExpression;
 
 /**
- * Created by jerem on 19/08/14.
+ * Class to contain information about the fitness.
  */
 public class Fitness{
 

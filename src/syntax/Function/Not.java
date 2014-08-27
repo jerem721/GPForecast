@@ -7,7 +7,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Created by jerem on 11/08/14.
+ * Not function.
  */
 public class Not implements IExpression {
 
