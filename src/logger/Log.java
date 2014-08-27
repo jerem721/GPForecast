@@ -4,7 +4,7 @@ import file.AFile;
 import file.WriterFile;
 
 /**
- * Created by jerem on 12/08/14.
+ * Class to log all event of the program.
  */
 public class Log {
 
@@ -37,7 +37,6 @@ public class Log {
     public void logInFile(boolean enable, String dir)
     {
         logInFile = enable;
-        AFile.deleteDirectory(dir);
     }
 
     public void changePathLog(String nameDir, String nameFile)

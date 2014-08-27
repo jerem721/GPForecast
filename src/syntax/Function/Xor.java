@@ -7,7 +7,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Created by jerem on 11/08/14.
+ * Xor function.
  */
 public class Xor implements IExpression {
 

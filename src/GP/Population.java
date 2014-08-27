@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 /**
- * Created by jerem on 11/08/14.
+ * Class to manage individuals.
  */
 public class Population {
 
@@ -21,7 +21,7 @@ public class Population {
 
 
     public enum EPopulationGeneration{
-        GROW_METHOD, FULL_METHOD, RAMPER_HALF_AND_HALF;
+        GROW_METHOD, FULL_METHOD, RAMPED_HALF_AND_HALF;
     }
 
     public Population()
@@ -30,21 +30,33 @@ public class Population {
         random = new Random();
     }
 
+    /**
+     * Add an individual into population.
+     */
     public void addIndividual(Individual individual)
     {
         individuals.add(individual);
     }
 
+    /**
+     * Add an individual into population.
+     */
     public void addIndividual(IExpression treeRoot)
     {
         individuals.add(new Individual(treeRoot));
     }
 
+    /**
+     * Return a list of individuals.
+     */
     public List<Individual>  getIndividuals()
     {
         return individuals;
     }
 
+    /**
+     * Print every GDTs (individuals) contained in the population and the best fitness.
+     */
     public void print(){
         int     i;
 
@@ -59,6 +71,9 @@ public class Population {
         }
     }
 
+    /**
+     * Print the best fitness of the population.
+     */
     public void printBestFitness()
     {
         DecimalFormat df;
@@ -68,6 +83,9 @@ public class Population {
         Log.getInstance().log("Best fitness: " + df.format(bestFitness.getTrainingValue()));
     }
 
+    /**
+     * Initialise the population with GDTs (individuals) with either Grow or Full or Ramped half-and-half method
+     */
     public void createPopulation(EPopulationGeneration type, int numberOfPopulation, int depth, PrimitiveSet primitiveSet, double primpProb)
     {
         individuals.clear();
@@ -81,7 +99,7 @@ public class Population {
                 case FULL_METHOD:
                     addIndividual(fullMethod(depth, primitiveSet));
                     break;
-                case RAMPER_HALF_AND_HALF:
+                case RAMPED_HALF_AND_HALF:
                     if (i % 2 == 0)
                         addIndividual(growMethod(random.nextInt(depth - 1) + 1, primitiveSet, primpProb));
                     else
@@ -91,6 +109,10 @@ public class Population {
         }
     }
 
+    /**
+     * Generate a GDT (individual) with the full method.
+     * @return  A GDT(individual)
+     */
     private IExpression fullMethod(int depth, PrimitiveSet primitiveSet)
     {
         IExpression children[];
@@ -108,6 +130,10 @@ public class Population {
         return primitiveSet.getRandomTerminal();
     }
 
+    /**
+     * Generate a GDT (individual) with the grow method.
+     * @return  A GDT(individual)
+     */
     private IExpression growMethod(int depth, PrimitiveSet primitiveSet, double primProb)
     {
         IExpression children[];
@@ -125,6 +151,9 @@ public class Population {
         return primitiveSet.getRandomTerminal();
     }
 
+    /**
+     * Launch the fitness function and evaluate each individual contained in the population.
+     */
     public void fitnessFunction(double account, int stock, int numberOfTrainingValue, Market market, Hashtable<Double,
             List<EEvent>> dcData)
     {
@@ -145,21 +174,34 @@ public class Population {
         }
     }
 
+    /**
+     * Return the best fitness of the population.
+     */
     public Fitness getBestFitness()
     {
         return bestFitness;
     }
 
+    /**
+     * Set the specified fitness as the best fitness.
+     */
     public void setBestFitness(Fitness bestFitness)
     {
         this.bestFitness = bestFitness;
     }
 
+    /**
+     * Sort individuals.
+     */
     public void sortPopulation()
     {
         Collections.sort(individuals);
     }
 
+    /**
+     * Tournament selection to select randomly an individual in the population.
+     * @return An individual.
+     */
     public Individual tournamentSelection(int tournamentSize)
     {
         List<Individual>        individuals;
@@ -177,6 +219,10 @@ public class Population {
         return best;
     }
 
+    /**
+     * Crossover operator.
+     * @return  An individual.
+     */
     public Individual crossover(int tournamentSize, double terminalNodeBias, int maxDepth)
     {
         Individual  copy1;
@@ -194,6 +240,10 @@ public class Population {
         return copy1;
     }
 
+    /**
+     * Mutation Operator.
+     * @return An individual.
+     */
     public Individual mutate(int tournamentSize, int maxDepth, PrimitiveSet primitiveSet, double primProb)
     {
         Individual  copy;
@@ -218,6 +268,10 @@ public class Population {
         return copy;
     }
 
+    /**
+     * Reproduction Operator.
+     * @return An individual.
+     */
     public Individual reproduction()
     {
         return individuals.get(random.nextInt(individuals.size())).clone();

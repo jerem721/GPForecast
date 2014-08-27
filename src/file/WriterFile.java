@@ -14,12 +14,29 @@ public class WriterFile extends AFile<FileWriter>
         super(filePath);
     }
 
+    public WriterFile(String filePath, boolean append)
+    {
+        super(filePath, append);
+        fileStream = openToAppend(append);
+    }
+
     @Override
     public FileWriter open() {
         if (!AFile.isExist(getFilePath()))
             AFile.createFile(getFilePath());
         try {
             return new FileWriter(getFilePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public FileWriter openToAppend(boolean append) {
+        if (!AFile.isExist(getFilePath()))
+            AFile.createFile(getFilePath());
+        try {
+            return new FileWriter(getFilePath(), append);
         } catch (IOException e) {
             e.printStackTrace();
         }

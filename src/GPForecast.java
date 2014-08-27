@@ -3,12 +3,11 @@ import GP.GP;
 import directionalChanges.DirectionalChanges;
 import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.EEvent;
-import directionalChanges.algorithm.events.IEvent;
-import directionalChanges.algorithm.runs.IRun;
 import file.AFile;
 import file.ReaderFile;
 import logger.Log;
-import properties.PropertiesGp;
+import properties.DCProperties;
+import properties.GPProperties;
 import statistic.Statistics;
 import syntax.Function.EFunction;
 import syntax.PrimitiveSet;
@@ -19,17 +18,14 @@ import java.util.*;
 
 public class GPForecast {
 
-    private DirectionalChanges dc;
-
-    private int                                 numberOfRandomConstant;
-    private double                              maxThresholdDC;
-    private double                              minThresholdDC;
-
+    private DirectionalChanges                  dc;
     private Market                              market;
-    private PropertiesGp                        propertiesGp;
+    private DCProperties                        dcProperties;
+    private GPProperties                        gpProperties;
     private PrimitiveSet                        primitiveSet;
     private GP                                  gp;
     private Hashtable<Double, List<EEvent>>     dcData;
+    private Statistics                          statistics;
 
     public static void main(String[] args) {
         GPForecast GPForecast;
@@ -42,48 +38,49 @@ public class GPForecast {
     {
         if (args.length < 2)
         {
-            System.out.println("./GeneticProgramming <input file> <output dir> [<config file>]");
+            System.out.println("./GPForecast <input file> <output dir> [<config file>]");
             System.exit(0);
-        }else  if (args.length > 2)
-            propertiesGp = new PropertiesGp(args[2]);
-        else
-            propertiesGp = new PropertiesGp();
+        }
 
-        Log.getInstance().enableLog(true);
-        Log.getInstance().logInFile(true, args[1]);
+        AFile.deleteDirectory(args[1]); // Delete all folder and file in the result directory.
+        Log.getInstance().enableLog(true); // Enable logger.
+        statistics = new Statistics(args[1]);
 
+        market = new Market();
+        initMarket(args[0]);
+        // Get the Directional-Change properties.
+        dcProperties = new DCProperties((args.length > 2) ? args[2] : null, args[0], args[1]);
+        dcProperties.save();
+        // Get the Genetic-Programming properties.
+        gpProperties = new GPProperties((args.length > 2) ? args[2] : null, args[1], market.getStocks().size());
+        gpProperties.save();
 
-        for (int i = 1; i <= 30; i++)
+        Log.getInstance().log(dcProperties.toString());
+        Log.getInstance().log(gpProperties.toString());
+
+        Log.getInstance().logInFile(true, args[1]); // Enable the logger to write in a file.
+        for (int i = 1; i <= 1; i++)
         {
             Log.getInstance().changePathLog(args[1] + "/Run" + i, "results.txt");
-            Log.getInstance().log("===== Configuration DC =====");
-            Log.getInstance().log("Data file : " + args[0]);
-            Log.getInstance().log("Output dir : " + args[1]);
-            numberOfRandomConstant = propertiesGp.getIntProperty("numberOfRandomConstant", 5);
-            Log.getInstance().log("Number of random constant : " + numberOfRandomConstant);
-            maxThresholdDC = propertiesGp.getDoubleProperty("maxThresholdDC", 100);
-            Log.getInstance().log("Maximum threshold : " + maxThresholdDC);
-            minThresholdDC = propertiesGp.getDoubleProperty("minThresholdDC", 0);
-            Log.getInstance().log("Minimum threshold : " + minThresholdDC);
-
             dcData = new Hashtable<Double, List<EEvent>>();
             primitiveSet = new PrimitiveSet();
 
-            market = new Market();
-            initMarket(args[0]);
+            gp = new GP(gpProperties, primitiveSet, market, dcData, statistics);
+            AFile.createDirectory(dcProperties.getOutFolder() + "/Run" + i + "/dc");
+            dc = new DirectionalChanges(dcProperties.getOutFolder() + "/Run" + i + "/dc", market);
 
-            gp = new GP(propertiesGp, primitiveSet, market, dcData);
-            AFile.createDirectory(args[1] + "/Run" + i + "/dc");
-            dc = new DirectionalChanges(args[1] + "/Run" + i + "/dc", market);
+            initFunctionSet(primitiveSet); // init the function set.
+            initTerminalSet(primitiveSet); // init the terminal set.
 
-            initFunctionSet(primitiveSet);
-            initTerminalSet(primitiveSet);
-
-            gp.start();
+            gp.start(); // start the GP algorithm.
         }
-        Statistics.getInstance().computeStatistics(args[1]);
+        statistics.computeStatistics(args[1]); // compute averages.
+        resultWithoutGP(args[1]); // Test the market without GP algorithm.
     }
 
+    /**
+     * Initialise the function set.
+     */
     private void initFunctionSet(PrimitiveSet primitiveSet)
     {
         Log.getInstance().log("\n===== Function Set =====");
@@ -100,6 +97,9 @@ public class GPForecast {
 
     }
 
+    /**
+     * Initialise the terminal set.
+     */
     private void initTerminalSet(PrimitiveSet primitiveSet)
     {
         DecimalFormat       df              = new DecimalFormat();
@@ -109,12 +109,12 @@ public class GPForecast {
 
         Log.getInstance().log("\n===== Terminal Set =====");
         df.setMaximumFractionDigits(2);
-        for (int i = numberOfRandomConstant; i > 0; i--)
+        for (int i = gpProperties.getnumberOfRandomThreshold(); i > 0; i--)
         {
             dcListener = new DCListener();
             dc.setListener(dcListener);
-            //threshold = Double.parseDouble(df.format(((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC)));
-            threshold = Double.parseDouble(df.format(Math.round((((rd.nextDouble() * (maxThresholdDC - minThresholdDC)) + minThresholdDC) / 0.05)) * 0.05));
+            threshold = Double.parseDouble(df.format(Math.round((((rd.nextDouble() * (dcProperties.getMaxThresholdDC()
+                    - dcProperties.getMinThresholdDC())) + dcProperties.getMinThresholdDC()) / 0.05)) * 0.05));
             dc.start(threshold);
             primitiveSet.addTerminal(new Constant(new Double(threshold)));
             dcData.put(threshold, dcListener.getEvents());
@@ -122,6 +122,9 @@ public class GPForecast {
         }
     }
 
+    /**
+     * Initialise the market by reading the input file of historic data.
+     */
     private void initMarket(String inputFile)
     {
         ReaderFile                  input;
@@ -132,6 +135,21 @@ public class GPForecast {
         for (Map.Entry<Integer, String> price : stockPrices.entrySet())
             market.addPrice(Double.parseDouble(price.getValue()));
         input.close();
+    }
+
+    /**
+     * Test the market without GP with different thresholds.
+     */
+    private void resultWithoutGP(String dir){
+        String              thresholds[];
+        ForecastThreshold   forecast;
+
+        thresholds = dcProperties.getThresholdTest().split(" ");
+        Log.getInstance().logInFile(false, null);
+        AFile.createDirectory(dir + "/RunWithoutGP");
+        forecast = new ForecastThreshold(gpProperties, market, statistics);
+        for (String threshold : thresholds)
+            forecast.computeFitness(Double.parseDouble(threshold), dir + "/RunWithoutGP/");
     }
 
 }

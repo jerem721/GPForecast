@@ -1,6 +1,7 @@
 package statistic;
 
 import GP.Fitness;
+import file.WriterFile;
 import logger.Log;
 
 import java.text.DecimalFormat;
@@ -8,28 +9,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jerem on 21/08/14.
+ * Class to compute some statistics (training fitness average, testing fitness average).
  */
 public class Statistics {
 
     private static Statistics      statistics;
 
+    private WriterFile      writerFile;
     private List<Fitness>   fitnesses;
 
-    private Statistics(){
+    public Statistics(String dir){
         fitnesses = new ArrayList<Fitness>();
-    }
-
-    public static Statistics getInstance()
-    {
-        if (statistics == null)
-            statistics = new Statistics();
-        return statistics;
+        writerFile = new WriterFile(dir + "/statistics.txt");
     }
 
     public void addFitness(Fitness fitness)
     {
         fitnesses.add(fitness);
+    }
+
+    public void write(String str)
+    {
+        writerFile.write(str);
     }
 
     public void computeStatistics(String dir)
@@ -39,9 +40,9 @@ public class Statistics {
         df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
 
-        Log.getInstance().changePathLog(dir, "statistics.txt");
-        Log.getInstance().log("Training average: " + df.format(trainingFitnessAverage()));
-        Log.getInstance().log("Testing average: " + df.format(testingFitnessAverage()));
+        writerFile.write("======= Fitness with GP ======");
+        writerFile.write("Training average: " + df.format(trainingFitnessAverage()));
+        writerFile.write("Testing average: " + df.format(testingFitnessAverage()));
     }
 
     public double trainingFitnessAverage()

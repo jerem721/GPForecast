@@ -3,19 +3,18 @@ package properties;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Properties;
 
 /**
- * Created by jerem on 12/08/14.
+ * Class to read the config file.
  */
-public class PropertiesGp {
+public class Properties {
 
-    private Properties      properties;
-    private FileReader      fileReader;
+    private java.util.Properties properties;
+    private FileReader fileReader;
 
-    public PropertiesGp()
+    public Properties()
     {
-        properties = new Properties();
+        properties = new java.util.Properties();
         try {
             fileReader = new FileReader("config.txt");
             properties.load(fileReader);
@@ -26,9 +25,9 @@ public class PropertiesGp {
         }
     }
 
-    public PropertiesGp(String file)
+    public Properties(String file)
     {
-        properties = new Properties();
+        properties = new java.util.Properties();
         try {
             fileReader = new FileReader(file);
             properties.load(fileReader);
@@ -68,5 +67,15 @@ public class PropertiesGp {
         if (value == null)
             return defaultValue;
         return Double.parseDouble(value);
+    }
+
+    public String getStringProperty(String key, String defaultValue)
+    {
+        String  value;
+
+        value = properties.getProperty(key);
+        if (value == null)
+            return defaultValue;
+        return value;
     }
 }

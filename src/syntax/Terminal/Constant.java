@@ -9,7 +9,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Created by jerem on 11/08/14.
+ * Constant terminal.
  */
 public class Constant implements IExpression {
 

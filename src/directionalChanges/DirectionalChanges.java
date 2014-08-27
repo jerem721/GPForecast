@@ -2,20 +2,16 @@ package directionalChanges;
 
 
 
-import directionalChanges.algorithm.Algorithm2;
+import directionalChanges.algorithm.Algorithm;
 import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.runs.IRun;
-import file.ReaderFile;
 import file.WriterFile;
 
-import java.util.*;
-
 /**
- * Created by jerem on 01/08/14.
+ * Compute the direction changes of the price in a specified market.
  */
-public class DirectionalChanges implements Algorithm2.OnDirectionalChangeListener {
+public class DirectionalChanges implements Algorithm.OnDirectionalChangeListener {
 
-    private ReaderFile                      intputFile;
     private WriterFile                      outputFile;
     private String                          outFileDirectory;
     private Market                          market;
@@ -32,20 +28,26 @@ public class DirectionalChanges implements Algorithm2.OnDirectionalChangeListene
         this.market = market;
     }
 
+    /**
+     * Set a listener to get each event of the market
+     */
     public void setListener(OnDirectionalChangesListener listener)
     {
         this.listener = listener;
     }
 
+    /**
+     * Run the algorithm of the Directional-Change method.
+     */
     public void start(double threshold)
     {
-        Algorithm2 algo;
+        Algorithm algo;
 
         market.resetMarket();
         outputFile = new WriterFile(outFileDirectory +"/directional_changes_" + threshold + "%.txt");
         outputFile.write(threshold + "%\t\t\tStart\tPrice\tEnd\tPrice\t\tTotal move");
         market.resetMarket();
-        algo = new Algorithm2(market);
+        algo = new Algorithm(market);
         algo.setOnDirectionalChangeListener(this);
         algo.launch(threshold);
         outputFile.close();

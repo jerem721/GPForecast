@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by jerem on 11/08/14.
+ * This class contains the primitive set (terminal and functional set) of the GP algorithm.
  */
 public class PrimitiveSet {
 

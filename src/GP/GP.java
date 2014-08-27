@@ -3,18 +3,17 @@ package GP;
 import directionalChanges.algorithm.Market;
 import directionalChanges.algorithm.events.EEvent;
 import logger.Log;
-import properties.PropertiesGp;
+import properties.GPProperties;
 import statistic.Statistics;
 import syntax.PrimitiveSet;
 
 import java.text.DecimalFormat;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Created by jerem on 12/08/14.
+ * Class to create and launch the GP Algorithm
  */
 public class GP{
 
@@ -23,98 +22,65 @@ public class GP{
     private Population                      population;
     private Market                          market;
     private Hashtable<Double, List<EEvent>> dcData;
-
-    private int                             populationSize;
-    private int                             maxDepthSizeInitial;
-    private int                             maxDepthSize;
-    private int                             tournamentSize;
-    private int                             numberOfGeneration;
-    private double                          elitismPercentage;
-    private double                          reproductionProbability;
-    private double                          mutationProbability;
-    private double                          terminalNodeBias;
-    private double                          primProbability;
-
-    private int                             numberOfStock;
-    private double                          numberOfTrainingMoney;
-    private double                          numberOfTestingMoney;
-    private int                             numberOfTrainingValue;
-    private int                             numberOfTestingValue;
+    private Statistics                      statistics;
+    private GPProperties                    gpProperties;
 
     private Fitness                         bestFitness;
 
 
-    public GP(PropertiesGp propertiesGp, PrimitiveSet primitiveSet, Market market, Hashtable<Double, List<EEvent>> dcData)
+    public GP(GPProperties gpProperties, PrimitiveSet primitiveSet, Market market, Hashtable<Double,
+            List<EEvent>> dcData, Statistics statistics)
     {
         rd = new Random();
+        this.gpProperties = gpProperties;
         this.primitiveSet = primitiveSet;
         this.market = market;
         this.dcData = dcData;
-
-        Log.getInstance().log("\n===== Configuration GP =====");
-
-        populationSize = propertiesGp.getIntProperty("populationSize", 20);
-        Log.getInstance().log("Population size: " + populationSize);
-        maxDepthSize = propertiesGp.getIntProperty("maxDepthSize", 8);
-        Log.getInstance().log("Max depth size: " + maxDepthSize);
-        maxDepthSizeInitial = propertiesGp.getIntProperty(" maxDepthSizeInitial", 5);
-        Log.getInstance().log("Max depth size initial: " + maxDepthSizeInitial);
-        tournamentSize = propertiesGp.getIntProperty("tournamentSize", 2);
-        Log.getInstance().log("Tournament size: " + tournamentSize);
-        numberOfGeneration = propertiesGp.getIntProperty("numberOfGeneration", 30);
-        Log.getInstance().log("Number of generation: " + numberOfGeneration);
-        elitismPercentage = propertiesGp.getDoubleProperty("elitismPercentage", 0.01);
-        Log.getInstance().log("Elitism percentage: " + elitismPercentage);
-        reproductionProbability = propertiesGp.getDoubleProperty("reproductionProbability", 0.01);
-        Log.getInstance().log("Reproduction probability: " + reproductionProbability);
-        mutationProbability = propertiesGp.getDoubleProperty("mutationProbability", 0.01);
-        Log.getInstance().log("Mutation probability: " + mutationProbability);
-        terminalNodeBias = propertiesGp.getDoubleProperty("terminalNodeBias", 0.1);
-        Log.getInstance().log("Terminal node bias: " + terminalNodeBias);
-        primProbability = propertiesGp.getDoubleProperty("primProbability", 0.6);
-        Log.getInstance().log("Prim probability: " + primProbability);
-        numberOfStock = propertiesGp.getIntProperty("numberOfStocks", 500);
-        Log.getInstance().log("Number of stocks: " + numberOfStock);
-        numberOfTrainingMoney = propertiesGp.getDoubleProperty("numberOfTrainingMoney", 500);
-        Log.getInstance().log("Number of money (training): " + numberOfTrainingMoney);
-        numberOfTestingMoney = propertiesGp.getDoubleProperty("numberOfTestingMoney", 500);
-        Log.getInstance().log("Number of money (testing): " + numberOfTestingMoney);
-        numberOfTrainingValue = propertiesGp.getIntProperty("numberOfTrainingValue", market.getStocks().size()/2);
-        Log.getInstance().log("Number of training value: " + numberOfTrainingValue);
-        numberOfTestingValue = propertiesGp.getIntProperty("numberOfTestingValue", market.getStocks().size()/2);
-        Log.getInstance().log("Number of testing value: " + numberOfTestingValue);
-
+        this.statistics = statistics;
         bestFitness = null;
     }
 
+    /**
+     * Function to start the GP.
+     */
     public void start()
     {
         int         i;
 
         i = 0;
         population = new Population();
-        population.createPopulation(Population.EPopulationGeneration.RAMPER_HALF_AND_HALF, populationSize,
-                maxDepthSizeInitial, primitiveSet, primProbability);
+        // create an initial population randomly with the Ramped_Half-And-Half method.
+        population.createPopulation(Population.EPopulationGeneration.RAMPED_HALF_AND_HALF, gpProperties.getPopulationSize(),
+                gpProperties.getMaxDepthSizeInitial(), primitiveSet, gpProperties.getPrimProbability());
         bestFitness = null;
-        market.resetMarket();
-        while (i < numberOfGeneration)
+        market.resetMarket(); // reset the market to the first value.
+        while (i < gpProperties.getNumberOfGeneration())
         {
             Log.getInstance().log("\n========== Generation " + i + " ==========");
 
-            population.fitnessFunction(numberOfTrainingMoney, numberOfStock, numberOfTrainingValue, market, dcData);
-            if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
+            //Compute the fitnessof the current population.
+            population.fitnessFunction(gpProperties.getNumberOfTrainingMoney(), gpProperties.getNumberOfStock(),
+                    gpProperties.getNumberOfTrainingValue(), market, dcData);
+            //Check if the best fitness of the current population is better than the current best fitness.
+           if (bestFitness == null || bestFitness.isBest(population.getBestFitness()))
                 bestFitness = population.getBestFitness();
             population.printBestFitness();
-
+            // Order the population by fitness.
             population.sortPopulation();
-            if (i < numberOfGeneration + 1)
-                population = breed();
+            if ((i + 1) < gpProperties.getNumberOfGeneration())
+                population = breed(); // Create the next population of individuals.
             i++;
         }
-        validateIndividual(numberOfTestingMoney, numberOfStock);
-        Statistics.getInstance().addFitness(bestFitness);
+        // Run the best individual of the run on untested data.
+        validateIndividual(gpProperties.getNumberOfTestingMoney(), gpProperties.getNumberOfStock());
+        statistics.addFitness(bestFitness);
     }
 
+    /**
+     * Method to create the next population from the current population.
+     * Used Mutation, Crossover, Reproduction operators and Elitism.
+     * @return  The next population.
+     */
     private Population breed()
     {
         Population  nextPopulation;
@@ -122,60 +88,63 @@ public class GP{
         double      probability;
 
         nextPopulation = new Population();
-        elitism = (int)(elitismPercentage * populationSize);
-        for (int i = 0; i < populationSize; i++) {
+        elitism = (int)(gpProperties.getElitismPercentage() * gpProperties.getPopulationSize());
+        for (int i = 0; i < gpProperties.getPopulationSize(); i++) {
             probability = rd.nextDouble();
             if (elitism > 0)
             {
                 nextPopulation.addIndividual(population.getIndividuals().get(elitism - 1));
                 elitism--;
                 continue;
-            }else if (probability <= reproductionProbability)
+            }else if (probability <= gpProperties.getReproductionProbability())
                 nextPopulation.addIndividual(population.reproduction());
-            else if (probability >= (1.0 - mutationProbability))
-                nextPopulation.addIndividual(population.mutate(tournamentSize, maxDepthSize,
-                        primitiveSet, primProbability));
+            else if (probability >= (1.0 - gpProperties.getMutationProbability()))
+                nextPopulation.addIndividual(population.mutate(gpProperties.getTournamentSize(),
+                        gpProperties.getMaxDepthSize(), primitiveSet, gpProperties.getPrimProbability()));
             else
-                nextPopulation.addIndividual(population.crossover(tournamentSize, terminalNodeBias, maxDepthSize));
+                nextPopulation.addIndividual(population.crossover(gpProperties.getTournamentSize(),
+                        gpProperties.getTerminalNodeBias(), gpProperties.getMaxDepthSize()));
         }
         return nextPopulation;
     }
 
+    /**
+     * Method to check the best individual on untested function.
+     * @param account       account of money for the test.
+     * @param totalStock    total of stock available for the test.
+     */
     private void validateIndividual(double account, int totalStock)
     {
         double          currentPrice;
         int             numberOfStock;
         boolean         buy;
-        Boolean         oldAction;
         double          fitness;
         DecimalFormat   df;
 
         if (bestFitness != null)
         {
+            df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
             numberOfStock = 0;
             currentPrice = 0.0;
-            oldAction = null;
-            for (int index = numberOfTrainingValue; index < numberOfTrainingValue + numberOfTestingValue; index++)
+            for (int index = gpProperties.getNumberOfTrainingValue();
+                 index < gpProperties.getNumberOfTrainingValue() + gpProperties.getNumberOfTestingValue(); index++)
             {
                 currentPrice = market.getPrice(index).getPrice();
                 buy = bestFitness.getTree().evaluate(index, dcData);
-                if ((oldAction == null || oldAction == false) && buy == true && account >= currentPrice && totalStock > 0)
+                if (buy == true && account >= currentPrice && totalStock > 0)
                 {
                     totalStock--;
                     numberOfStock++;
                     account -= currentPrice;
-                    oldAction = true;
-                }else if ((oldAction == null || oldAction == true) && buy == false && numberOfStock > 0)
+                }else if (buy == false && numberOfStock > 0)
                 {
                     totalStock++;
                     numberOfStock--;
                     account += currentPrice;
-                    oldAction = false;
                 }
             }
             fitness = account + (numberOfStock * currentPrice);
-            df = new DecimalFormat();
-            df.setMaximumFractionDigits(2);
             Log.getInstance().log("\n\n=== BEST PREDICTOR PROGRAM ===");
             Log.getInstance().log("Training fitness: " + df.format(bestFitness.getTrainingValue()));
             Log.getInstance().log("Testing fitness: " + df.format(fitness));

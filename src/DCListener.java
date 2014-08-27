@@ -5,9 +5,6 @@ import directionalChanges.algorithm.runs.IRun;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by jerem on 19/08/14.
- */
 public class DCListener implements DirectionalChanges.OnDirectionalChangesListener {
 
     private List<EEvent>        events;

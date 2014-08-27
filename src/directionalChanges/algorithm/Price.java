@@ -1,7 +1,7 @@
 package directionalChanges.algorithm;
 
 /**
- * Created by jerem on 02/08/14.
+ * Class to represent a price.
  */
 public class Price {
 

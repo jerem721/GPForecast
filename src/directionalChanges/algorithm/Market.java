@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jerem on 02/08/14.
+ * Class to represent the market activity. It contains all prices.
  */
 public class Market {
 
