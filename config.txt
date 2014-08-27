@@ -1,8 +1,8 @@
 populationSize = 200
-maxDepthSize = 10
+maxDepthSize = 8
 maxDepthSizeInitial = 5
 tournamentSize = 2
-numberOfGeneration = 300
+numberOfGeneration = 500
 elitismPercentage = 0.01
 reproductionProbability = 0.01
 mutationProbability = 0.01

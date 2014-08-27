@@ -59,7 +59,7 @@ public class GPForecast {
         Log.getInstance().log(gpProperties.toString());
 
         Log.getInstance().logInFile(true, args[1]); // Enable the logger to write in a file.
-        for (int i = 1; i <= 1; i++)
+        for (int i = 1; i <= 30; i++)
         {
             Log.getInstance().changePathLog(args[1] + "/Run" + i, "results.txt");
             dcData = new Hashtable<Double, List<EEvent>>();
