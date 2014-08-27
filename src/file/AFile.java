@@ -2,9 +2,6 @@ package file;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Created by jerem on 01/08/14.
@@ -37,28 +34,24 @@ public abstract class AFile<T> {
 
     public static boolean isExist(String filePath)
     {
-        Path path = Paths.get(filePath);
-        return Files.notExists(path);
+        File fb = new File(filePath);
+        return fb.exists();
     }
 
     public static boolean delete(String filePath)
     {
-        Path path = Paths.get(filePath);
-        try {
-            return Files.deleteIfExists(path);
-        } catch (IOException e) {
-            System.out.print(e.getMessage());
-        }
-        return false;
+
+        File fb = new File(filePath);
+        return fb.delete();
     }
 
     public static void createFile(String filePath)
     {
-        Path path = Paths.get(filePath);
+        File fb = new File(filePath);
         try {
-            Files.createFile(path);
+            fb.createNewFile();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
