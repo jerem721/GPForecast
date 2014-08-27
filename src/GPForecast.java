@@ -42,6 +42,7 @@ public class GPForecast {
             System.exit(0);
         }
 
+	    AFile.createDirectory(args[1]); // Create the outpu folder if it does not exist.
         AFile.deleteDirectory(args[1]); // Delete all folder and file in the result directory.
         Log.getInstance().enableLog(true); // Enable logger.
         statistics = new Statistics(args[1]);
